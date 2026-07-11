@@ -11,10 +11,7 @@
         </Grid.RowDefinitions>
 
         <!-- Top navigation bar -->
-        <Grid Grid.Row="0"
-              Background="{ThemeResource NavigationViewTopPaneBackground}"
-              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-              BorderThickness="0,0,0,1">
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />

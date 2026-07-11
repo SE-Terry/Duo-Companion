@@ -54,6 +54,13 @@ Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
 
 Invoke-MSBuild @(
     $solution,
+    '/t:Clean',
+    "/p:Configuration=$Configuration",
+    "/p:Platform=$Platform",
+    "/p:RuntimeIdentifier=$RuntimeIdentifier"
+)
+Invoke-MSBuild @(
+    $solution,
     '/restore',
     "/p:Configuration=$Configuration",
     "/p:Platform=$Platform",
