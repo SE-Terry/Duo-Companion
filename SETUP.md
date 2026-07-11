@@ -62,7 +62,14 @@ msbuild DuoCompanion.sln /restore /p:Configuration=Release /p:Platform=ARM64 /p:
 Or:
 
 ```powershell
+Set-ExecutionPolicy -Scope Process Bypass
 .\build-release.ps1
+```
+
+If you prefer not to change the current shell policy, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build-release.ps1
 ```
 
 Output:
@@ -82,7 +89,17 @@ The prebuilt files in `dist/DuoCompanion-win-arm64/` must be produced on a **Win
 
 From a Windows machine with Visual Studio's Windows App SDK tooling installed (see [Prerequisites](#prerequisites)), run `.\build-release.ps1`.
 
-Zip `dist/DuoCompanion-win-arm64` to create the release artifact for GitHub Releases (`DuoCompanion-win-arm64.zip`).
+Output:
+```
+dist\DuoCompanion-win-arm64\DuoCompanion.exe
+```
+
+The script prints the full path when it finishes, for example:
+```
+Release output is in C:\path\to\Surface-Duo-HSOSK\dist\DuoCompanion-win-arm64
+```
+
+The release is self-contained, so it bundles .NET and the Windows App SDK alongside the executable. Keep all of the generated files together when zipping `dist/DuoCompanion-win-arm64` for GitHub Releases (`DuoCompanion-win-arm64.zip`). The ZIP will be larger, but users will not need to install either runtime separately.
 
 ---
 

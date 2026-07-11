@@ -30,6 +30,15 @@ function Get-MsBuildPath {
     return $msbuild
 }
 
+function Invoke-MSBuild {
+    param([string[]]$Arguments)
+
+    & $msbuildPath @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "MSBuild failed with exit code $LASTEXITCODE. The existing release was left unchanged."
+    }
+}
+
 $msbuildPath = Get-MsBuildPath
 $solution = Join-Path $PSScriptRoot 'DuoCompanion.sln'
 $project = Join-Path $PSScriptRoot 'src\DuoCompanion.App\DuoCompanion.App.csproj'
@@ -37,11 +46,26 @@ $staging = Join-Path $PSScriptRoot 'dist-staging\DuoCompanion-win-arm64'
 $release = Join-Path $PSScriptRoot 'dist\DuoCompanion-win-arm64'
 
 Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
+
+Invoke-MSBuild @(
+    $solution,
+    '/restore',
+    "/p:Configuration=$Configuration",
+    "/p:Platform=$Platform",
+    "/p:RuntimeIdentifier=$RuntimeIdentifier"
+)
+Invoke-MSBuild @(
+    $project,
+    '/restore',
+    '/t:Publish',
+    "/p:Configuration=$Configuration",
+    "/p:Platform=$Platform",
+    "/p:RuntimeIdentifier=$RuntimeIdentifier",
+    '/p:SelfContained=true',
+    "/p:PublishDir=$staging\"
+)
+
 Remove-Item $release -Recurse -Force -ErrorAction SilentlyContinue
-
-& $msbuildPath $solution /restore /p:Configuration=$Configuration /p:Platform=$Platform /p:RuntimeIdentifier=$RuntimeIdentifier
-& $msbuildPath $project /restore /t:Publish /p:Configuration=$Configuration /p:Platform=$Platform /p:RuntimeIdentifier=$RuntimeIdentifier /p:SelfContained=false /p:PublishDir="$staging\"
-
 Move-Item $staging $release
 
 Write-Host "Release output is in $release"

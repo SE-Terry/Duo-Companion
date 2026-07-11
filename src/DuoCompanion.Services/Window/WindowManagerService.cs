@@ -45,6 +45,27 @@ public sealed class WindowManagerService : IWindowManagerService, IDisposable
         _hookProc = null;
     }
 
+    public void MakeWindowNonActivating(IntPtr hwnd)
+    {
+        var extendedStyle = NativeMethods.GetWindowLongPtr(hwnd, NativeMethods.GWL_EXSTYLE);
+        NativeMethods.SetWindowLongPtr(
+            hwnd,
+            NativeMethods.GWL_EXSTYLE,
+            extendedStyle | NativeMethods.WS_EX_NOACTIVATE);
+
+        NativeMethods.SetWindowPos(
+            hwnd,
+            IntPtr.Zero,
+            0, 0, 0, 0,
+            (uint)(NativeMethods.SWP_NOMOVE |
+                   NativeMethods.SWP_NOSIZE |
+                   NativeMethods.SWP_NOZORDER |
+                   NativeMethods.SWP_NOACTIVATE |
+                   NativeMethods.SWP_FRAMECHANGED));
+
+        _logger.LogInformation("Companion window configured to preserve the active application");
+    }
+
     public void PositionCompanionWindow(IntPtr hwnd)
     {
         var target = SelectCompanionDisplay();

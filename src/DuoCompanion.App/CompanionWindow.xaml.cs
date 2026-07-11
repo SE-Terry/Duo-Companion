@@ -75,6 +75,7 @@ public sealed partial class CompanionWindow : Window
         var hwnd = WindowNative.GetWindowHandle(this);
         _windowManager.StartMonitoring(hwnd);
         _windowManager.PositionCompanionWindow(hwnd);
+        _windowManager.MakeWindowNonActivating(hwnd);
         _automation.Start();
         NavigateTo(typeof(KeyboardPage));
     }

@@ -41,9 +41,13 @@ internal static class NativeMethods
 
     internal const int SWP_NOMOVE = 0x0002;
     internal const int SWP_NOSIZE = 0x0001;
+    internal const int SWP_NOZORDER = 0x0004;
     internal const int SWP_NOACTIVATE = 0x0010;
+    internal const int SWP_FRAMECHANGED = 0x0020;
     internal const uint WINEVENT_OUTOFCONTEXT = 0x0000;
     internal const uint EVENT_SYSTEM_DISPLAYCHANGE = 0x001B;
+    internal const int GWL_EXSTYLE = -20;
+    internal const nint WS_EX_NOACTIVATE = 0x08000000;
 
     internal static readonly IntPtr HWND_TOPMOST = new(-1);
 
@@ -51,6 +55,12 @@ internal static class NativeMethods
     internal static extern bool SetWindowPos(
         IntPtr hWnd, IntPtr hWndInsertAfter,
         int X, int Y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
+    internal static extern nint GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", SetLastError = true)]
+    internal static extern nint SetWindowLongPtr(IntPtr hWnd, int nIndex, nint dwNewLong);
 
     [DllImport("user32.dll")]
     internal static extern IntPtr SetWinEventHook(

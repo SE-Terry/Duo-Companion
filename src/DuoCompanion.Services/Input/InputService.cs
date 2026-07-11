@@ -77,14 +77,27 @@ public sealed class InputService : IInputService
                     }
                 }
             };
-            NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<NativeMethods.INPUT>());
+            Send(inputs);
         }
         _logger.LogDebug("Sent text of {Length} chars", text.Length);
     }
 
-    private static void Send(NativeMethods.INPUT input)
+    private void Send(NativeMethods.INPUT input) => Send(new[] { input });
+
+    private void Send(NativeMethods.INPUT[] inputs)
     {
-        var inputs = new[] { input };
-        NativeMethods.SendInput(1, inputs, Marshal.SizeOf<NativeMethods.INPUT>());
+        var sent = NativeMethods.SendInput(
+            (uint)inputs.Length,
+            inputs,
+            Marshal.SizeOf<NativeMethods.INPUT>());
+
+        if (sent != (uint)inputs.Length)
+        {
+            _logger.LogWarning(
+                "SendInput accepted {Sent} of {Requested} input events (Win32 error {Error})",
+                sent,
+                inputs.Length,
+                Marshal.GetLastWin32Error());
+        }
     }
 }

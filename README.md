@@ -29,12 +29,7 @@ The app **does not replace Windows** and **does not modify the system touch keyb
 2. Extract it anywhere on your Surface Duo (e.g. `Documents\DuoCompanion`).
 3. Run `DuoCompanion.exe` — no installer, no build, no admin rights required.
 
-The app is unpackaged (no MSIX), so it runs directly from the extracted folder. It's framework-dependent, so it needs two runtimes present on the device — most Windows 11 ARM machines already have them, but if the app won't start, install them:
-
-```powershell
-winget install Microsoft.DotNet.Runtime.9
-winget install Microsoft.WindowsAppRuntime.2
-```
+The release is self-contained: keep every file from the extracted folder together, then run the `.exe`. It does not require separate .NET or Windows App Runtime installation.
 
 ### First-Run Checklist
 
