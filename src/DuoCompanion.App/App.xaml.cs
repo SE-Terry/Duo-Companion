@@ -19,31 +19,65 @@ public partial class App : Application
 
     public App()
     {
-        InitializeComponent();
-        Services = BuildServices();
-        UnhandledException += OnUnhandledException;
+        WriteStartupLog("App constructor started.");
+        try
+        {
+            InitializeComponent();
+            WriteStartupLog("WinUI application initialized.");
+
+            Services = BuildServices();
+            UnhandledException += OnUnhandledException;
+            WriteStartupLog("Services initialized.");
+        }
+        catch (Exception ex)
+        {
+            WriteStartupLog($"App constructor failed:{Environment.NewLine}{ex}");
+            throw;
+        }
     }
 
     private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         Services.GetRequiredService<ILogger<App>>().LogCritical(e.Exception, "Unhandled exception on UI thread");
-        System.IO.File.AppendAllText(
-            System.IO.Path.Combine(AppContext.BaseDirectory, "crash.log"),
-            $"{DateTime.Now:O}{Environment.NewLine}{e.Exception}{Environment.NewLine}{new string('-', 40)}{Environment.NewLine}");
+        WriteStartupLog($"Unhandled UI exception:{Environment.NewLine}{e.Exception}");
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        Services.GetRequiredService<IClipboardService>().Initialize();
+        WriteStartupLog("Application launch started.");
+        try
+        {
+            Services.GetRequiredService<IClipboardService>().Initialize();
 
-        var orientation = Services.GetRequiredService<IOrientationService>();
-        Services.GetRequiredService<IWindowManagerService>().DisplayConfigurationChanged +=
-            (_, _) => orientation.Refresh();
+            var orientation = Services.GetRequiredService<IOrientationService>();
+            Services.GetRequiredService<IWindowManagerService>().DisplayConfigurationChanged +=
+                (_, _) => orientation.Refresh();
 
-        CompanionWindow = new CompanionWindow(
-            Services.GetRequiredService<IWindowManagerService>(),
-            Services.GetRequiredService<IUiAutomationService>());
-        CompanionWindow.Activate();
+            CompanionWindow = new CompanionWindow(
+                Services.GetRequiredService<IWindowManagerService>(),
+                Services.GetRequiredService<IUiAutomationService>());
+            CompanionWindow.Activate();
+            WriteStartupLog("Companion window activated.");
+        }
+        catch (Exception ex)
+        {
+            WriteStartupLog($"Application launch failed:{Environment.NewLine}{ex}");
+            throw;
+        }
+    }
+
+    private static void WriteStartupLog(string message)
+    {
+        try
+        {
+            System.IO.File.AppendAllText(
+                System.IO.Path.Combine(AppContext.BaseDirectory, "startup.log"),
+                $"{DateTime.Now:O} {message}{Environment.NewLine}{new string('-', 40)}{Environment.NewLine}");
+        }
+        catch
+        {
+            // Diagnostics must not prevent application startup.
+        }
     }
 
     private static IServiceProvider BuildServices()

@@ -42,8 +42,13 @@ function Invoke-MSBuild {
 $msbuildPath = Get-MsBuildPath
 $solution = Join-Path $PSScriptRoot 'DuoCompanion.sln'
 $project = Join-Path $PSScriptRoot 'src\DuoCompanion.App\DuoCompanion.App.csproj'
+$releaseCheck = Join-Path $PSScriptRoot 'scripts\Test-DuoCompanionRelease.ps1'
 $staging = Join-Path $PSScriptRoot 'dist-staging\DuoCompanion-win-arm64'
 $release = Join-Path $PSScriptRoot 'dist\DuoCompanion-win-arm64'
+
+if (-not (Test-Path $releaseCheck)) {
+    throw "Release check script was not found at $releaseCheck"
+}
 
 Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
 
@@ -64,6 +69,16 @@ Invoke-MSBuild @(
     '/p:SelfContained=true',
     "/p:PublishDir=$staging\"
 )
+
+Copy-Item $releaseCheck (Join-Path $staging 'Test-DuoCompanionRelease.ps1')
+
+$requiredOutput = @('DuoCompanion.exe', 'coreclr.dll')
+$missingOutput = $requiredOutput | Where-Object {
+    -not (Test-Path (Join-Path $staging $_))
+}
+if ($missingOutput) {
+    throw "Publish output is not self-contained. Missing: $($missingOutput -join ', '). The existing release was left unchanged."
+}
 
 Remove-Item $release -Recurse -Force -ErrorAction SilentlyContinue
 Move-Item $staging $release

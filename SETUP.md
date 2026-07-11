@@ -101,6 +101,14 @@ Release output is in C:\path\to\Surface-Duo-HSOSK\dist\DuoCompanion-win-arm64
 
 The release is self-contained, so it bundles .NET and the Windows App SDK alongside the executable. Keep all of the generated files together when zipping `dist/DuoCompanion-win-arm64` for GitHub Releases (`DuoCompanion-win-arm64.zip`). The ZIP will be larger, but users will not need to install either runtime separately.
 
+Every published folder includes `Test-DuoCompanionRelease.ps1`. Run this before uploading or before launching a downloaded ZIP:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Test-DuoCompanionRelease.ps1
+```
+
+It confirms the bundled .NET runtime and Windows App SDK version, and reports any machine-wide Windows App Runtime installation. A missing machine-wide Windows App Runtime is expected and does not fail the check.
+
 ---
 
 ## Tests

@@ -31,6 +31,12 @@ The app **does not replace Windows** and **does not modify the system touch keyb
 
 The release is self-contained: keep every file from the extracted folder together, then run the `.exe`. It does not require separate .NET or Windows App Runtime installation.
 
+Before running the app, you can verify the extracted release folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Test-DuoCompanionRelease.ps1
+```
+
 ### First-Run Checklist
 
 1. **Handwriting**: Windows Settings → Optional Features → search "Handwriting" → Install.
