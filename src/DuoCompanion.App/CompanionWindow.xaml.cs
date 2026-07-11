@@ -27,7 +27,7 @@ public sealed partial class CompanionWindow : Window
     {
         _windowManager = windowManager;
         _automation    = automation;
-        InitializeComponent();
+        Title = "Duo Companion";
         Content = CreateContent();
 
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
