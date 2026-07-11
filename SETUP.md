@@ -53,8 +53,16 @@ Or download and extract the ZIP from **Code → Download ZIP** on GitHub.
 
 ### Command Line
 
+Use **Developer PowerShell for Visual Studio** so `msbuild` is on `PATH`, or run the repo-root script below.
+
 ```powershell
 msbuild DuoCompanion.sln /restore /p:Configuration=Release /p:Platform=ARM64 /p:RuntimeIdentifier=win-arm64
+```
+
+Or:
+
+```powershell
+.\build-release.ps1
 ```
 
 Output:
@@ -72,16 +80,7 @@ Run directly — no installer or MSIX required:
 
 The prebuilt files in `dist/DuoCompanion-win-arm64/` must be produced on a **Windows** machine. WinUI 3 requires Windows Visual Studio / MSBuild tooling to compile XAML and publish the executable — this cannot be done from macOS or Linux.
 
-From a Windows machine with Visual Studio's Windows App SDK tooling installed (see [Prerequisites](#prerequisites)):
-
-```powershell
-$staging = Join-Path $PWD 'dist-staging\DuoCompanion-win-arm64'
-$release = Join-Path $PWD 'dist\DuoCompanion-win-arm64'
-Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
-msbuild src\DuoCompanion.App\DuoCompanion.App.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=ARM64 /p:RuntimeIdentifier=win-arm64 /p:SelfContained=false /p:PublishDir="$staging\"
-Remove-Item $release -Recurse -Force -ErrorAction SilentlyContinue
-Move-Item $staging $release
-```
+From a Windows machine with Visual Studio's Windows App SDK tooling installed (see [Prerequisites](#prerequisites)), run `.\build-release.ps1`.
 
 Zip `dist/DuoCompanion-win-arm64` to create the release artifact for GitHub Releases (`DuoCompanion-win-arm64.zip`).
 
@@ -100,8 +99,8 @@ dotnet test tests\DuoCompanion.Tests\DuoCompanion.Tests.csproj
 When a new version is available:
 
 1. `git pull` (or download and extract the new ZIP, overwriting the old folder)
-2. Rebuild: `msbuild DuoCompanion.sln /restore /p:Configuration=Release /p:Platform=ARM64 /p:RuntimeIdentifier=win-arm64`
-3. If you are regenerating the release package, rerun the publish steps above and replace `dist/DuoCompanion-win-arm64`
+2. Rebuild: `.\build-release.ps1`
+3. If you only need a build and not a release package, use `msbuild DuoCompanion.sln /restore /p:Configuration=Release /p:Platform=ARM64 /p:RuntimeIdentifier=win-arm64`
 4. Run the `.exe` — no reinstall needed
 
 ---
