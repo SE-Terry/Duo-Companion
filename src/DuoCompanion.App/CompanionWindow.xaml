@@ -2,44 +2,4 @@
     x:Class="DuoCompanion.App.CompanionWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Duo Companion">
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="52" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <!-- Top navigation bar -->
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" Padding="8,0">
-                <Button x:Name="BtnKeyboard"    Tag="Keyboard"    Click="OnNavClick" ToolTipService.ToolTip="Keyboard">
-                    <FontIcon Glyph="&#xE765;" />
-                </Button>
-                <Button x:Name="BtnTouchpad"   Tag="Touchpad"    Click="OnNavClick" ToolTipService.ToolTip="Touchpad">
-                    <FontIcon Glyph="&#xE7C5;" />
-                </Button>
-                <Button x:Name="BtnClipboard"  Tag="Clipboard"   Click="OnNavClick" ToolTipService.ToolTip="Clipboard">
-                    <FontIcon Glyph="&#xE77F;" />
-                </Button>
-                <Button x:Name="BtnMedia"      Tag="Media"       Click="OnNavClick" ToolTipService.ToolTip="Media">
-                    <FontIcon Glyph="&#xE768;" />
-                </Button>
-                <Button x:Name="BtnHandwrite"  Tag="Handwriting" Click="OnNavClick" ToolTipService.ToolTip="Handwriting">
-                    <FontIcon Glyph="&#xED63;" />
-                </Button>
-            </StackPanel>
-            <Button Grid.Column="1" x:Name="BtnSettings" Tag="Settings" Click="OnNavClick" ToolTipService.ToolTip="Settings"
-                    Margin="0,0,8,0">
-                <FontIcon Glyph="&#xE713;" />
-            </Button>
-        </Grid>
-
-        <!-- Module content frame -->
-        <Frame x:Name="ContentFrame" Grid.Row="1" />
-    </Grid>
-</Window>
+    Title="Duo Companion" />

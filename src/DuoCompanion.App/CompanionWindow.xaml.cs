@@ -10,6 +10,7 @@ public sealed partial class CompanionWindow : Window
 {
     private readonly IWindowManagerService _windowManager;
     private readonly IUiAutomationService _automation;
+    private readonly Frame _contentFrame = new();
     private Type _lastManualPage = typeof(KeyboardPage);
 
     private static readonly Dictionary<string, Type> _pageMap = new()
@@ -27,6 +28,7 @@ public sealed partial class CompanionWindow : Window
         _windowManager = windowManager;
         _automation    = automation;
         InitializeComponent();
+        Content = CreateContent();
 
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption =
@@ -41,8 +43,8 @@ public sealed partial class CompanionWindow : Window
 
     public void NavigateTo(Type pageType)
     {
-        if (ContentFrame.CurrentSourcePageType != pageType)
-            ContentFrame.Navigate(pageType);
+        if (_contentFrame.CurrentSourcePageType != pageType)
+            _contentFrame.Navigate(pageType);
     }
 
     private void OnNavClick(object sender, RoutedEventArgs e)
@@ -64,7 +66,7 @@ public sealed partial class CompanionWindow : Window
         // Only revert if user hadn't manually switched away from keyboard
         DispatcherQueue.TryEnqueue(() =>
         {
-            if (ContentFrame.CurrentSourcePageType == typeof(KeyboardPage))
+            if (_contentFrame.CurrentSourcePageType == typeof(KeyboardPage))
                 NavigateTo(_lastManualPage == typeof(KeyboardPage) ? typeof(KeyboardPage) : _lastManualPage);
         });
     }
@@ -94,5 +96,52 @@ public sealed partial class CompanionWindow : Window
         _automation.Stop();
         _windowManager.DisplayConfigurationChanged -= OnDisplayConfigurationChanged;
         _windowManager.StopMonitoring();
+    }
+
+    private Grid CreateContent()
+    {
+        var root = new Grid();
+        root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(52) });
+        root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+        var navigationBar = new Grid();
+        navigationBar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        navigationBar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var navigationButtons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 4,
+            Padding = new Thickness(8, 0, 8, 0)
+        };
+        navigationButtons.Children.Add(CreateNavigationButton("Keyboard", "Keyboard", "\uE765"));
+        navigationButtons.Children.Add(CreateNavigationButton("Touchpad", "Touchpad", "\uE7C5"));
+        navigationButtons.Children.Add(CreateNavigationButton("Clipboard", "Clipboard", "\uE77F"));
+        navigationButtons.Children.Add(CreateNavigationButton("Media", "Media", "\uE768"));
+        navigationButtons.Children.Add(CreateNavigationButton("Handwriting", "Handwriting", "\uED63"));
+
+        var settingsButton = CreateNavigationButton("Settings", "Settings", "\uE713");
+        settingsButton.Margin = new Thickness(0, 0, 8, 0);
+
+        navigationBar.Children.Add(navigationButtons);
+        Grid.SetColumn(settingsButton, 1);
+        navigationBar.Children.Add(settingsButton);
+
+        root.Children.Add(navigationBar);
+        Grid.SetRow(_contentFrame, 1);
+        root.Children.Add(_contentFrame);
+        return root;
+    }
+
+    private Button CreateNavigationButton(string tag, string toolTip, string glyph)
+    {
+        var button = new Button
+        {
+            Tag = tag,
+            Content = new FontIcon { Glyph = glyph }
+        };
+        ToolTipService.SetToolTip(button, toolTip);
+        button.Click += OnNavClick;
+        return button;
     }
 }
