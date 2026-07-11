@@ -54,7 +54,7 @@ Or download and extract the ZIP from **Code → Download ZIP** on GitHub.
 ### Command Line
 
 ```powershell
-dotnet build DuoCompanion.sln -c Release -r win-arm64
+msbuild DuoCompanion.sln /restore /p:Configuration=Release /p:Platform=ARM64 /p:RuntimeIdentifier=win-arm64
 ```
 
 Output:
@@ -75,10 +75,15 @@ The prebuilt files in `dist/DuoCompanion-win-arm64/` must be produced on a **Win
 From a Windows machine with Visual Studio's Windows App SDK tooling installed (see [Prerequisites](#prerequisites)):
 
 ```powershell
-dotnet publish src\DuoCompanion.App\DuoCompanion.App.csproj -c Release -r win-arm64 --self-contained false -o dist\DuoCompanion-win-arm64
+$staging = Join-Path $PWD 'dist-staging\DuoCompanion-win-arm64'
+$release = Join-Path $PWD 'dist\DuoCompanion-win-arm64'
+Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
+msbuild src\DuoCompanion.App\DuoCompanion.App.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=ARM64 /p:RuntimeIdentifier=win-arm64 /p:SelfContained=false /p:PublishDir="$staging\"
+Remove-Item $release -Recurse -Force -ErrorAction SilentlyContinue
+Move-Item $staging $release
 ```
 
-Replace the contents of `dist/DuoCompanion-win-arm64` with the published output. Zip that folder to create the release artifact for GitHub Releases (`DuoCompanion-win-arm64.zip`).
+Zip `dist/DuoCompanion-win-arm64` to create the release artifact for GitHub Releases (`DuoCompanion-win-arm64.zip`).
 
 ---
 
@@ -95,8 +100,9 @@ dotnet test tests\DuoCompanion.Tests\DuoCompanion.Tests.csproj
 When a new version is available:
 
 1. `git pull` (or download and extract the new ZIP, overwriting the old folder)
-2. Rebuild: `dotnet build DuoCompanion.sln -c Release -r win-arm64`
-3. Run the `.exe` — no reinstall needed
+2. Rebuild: `msbuild DuoCompanion.sln /restore /p:Configuration=Release /p:Platform=ARM64 /p:RuntimeIdentifier=win-arm64`
+3. If you are regenerating the release package, rerun the publish steps above and replace `dist/DuoCompanion-win-arm64`
+4. Run the `.exe` — no reinstall needed
 
 ---
 
