@@ -7,4 +7,5 @@ public sealed class AppSettings
     public string DefaultModule { get; set; } = "Keyboard"; // matches nav tag
     public double KeyboardButtonSize { get; set; } = 56;
     public double WindowOpacity { get; set; } = 1.0;
+    public string CompanionDisplay { get; set; } = "Right"; // "Right", "Left", "Auto" (whichever Windows reports as secondary)
 }

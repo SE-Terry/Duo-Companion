@@ -35,7 +35,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <FontIcon Grid.Column="0"
-                                          Glyph="{x:Bind IsPrimary ? '&#xE7F4;' : '&#xE780;'}"
+                                          Glyph="{x:Bind Glyph}"
                                           FontSize="28"
                                           VerticalAlignment="Center" />
 

@@ -1,4 +1,5 @@
 using DuoCompanion.Contracts.Services;
+using DuoCompanion.Core.Models;
 using DuoCompanion.Services.Win32;
 using Microsoft.Extensions.Logging;
 
@@ -7,15 +8,17 @@ namespace DuoCompanion.Services.Window;
 public sealed class WindowManagerService : IWindowManagerService, IDisposable
 {
     private readonly IDisplayService _display;
+    private readonly ISettingsService _settings;
     private readonly ILogger<WindowManagerService> _logger;
     private IntPtr _hook;
     private NativeMethods.WinEventProc? _hookProc; // must hold strong ref — GC can collect delegates passed to unmanaged code
 
     public event EventHandler? DisplayConfigurationChanged;
 
-    public WindowManagerService(IDisplayService display, ILogger<WindowManagerService> logger)
+    public WindowManagerService(IDisplayService display, ISettingsService settings, ILogger<WindowManagerService> logger)
     {
         _display = display;
+        _settings = settings;
         _logger = logger;
     }
 
@@ -42,23 +45,36 @@ public sealed class WindowManagerService : IWindowManagerService, IDisposable
         _hookProc = null;
     }
 
-    public void PositionOnSecondaryDisplay(IntPtr hwnd)
+    public void PositionCompanionWindow(IntPtr hwnd)
     {
-        var secondary = _display.GetSecondaryDisplay();
-        if (secondary is null)
+        var target = SelectCompanionDisplay();
+        if (target is null)
         {
-            _logger.LogWarning("No secondary display found — companion window cannot be positioned");
+            _logger.LogWarning("No suitable display found — companion window cannot be positioned");
             return;
         }
 
         NativeMethods.SetWindowPos(
             hwnd, NativeMethods.HWND_TOPMOST,
-            secondary.X, secondary.Y,
-            secondary.Width, secondary.Height,
+            target.X, target.Y,
+            target.Width, target.Height,
             (uint)NativeMethods.SWP_NOACTIVATE);
 
         _logger.LogInformation("Companion window positioned at {X},{Y} size {W}x{H}",
-            secondary.X, secondary.Y, secondary.Width, secondary.Height);
+            target.X, target.Y, target.Width, target.Height);
+    }
+
+    private DisplayInfo? SelectCompanionDisplay()
+    {
+        var displays = _display.GetAllDisplays();
+        if (displays.Count < 2) return null; // single-screen/folded — leave the window where it is, no crash
+
+        return _settings.Current.CompanionDisplay switch
+        {
+            "Left" => displays.OrderBy(d => d.X).First(),
+            "Right" => displays.OrderByDescending(d => d.X).First(),
+            _ => displays.FirstOrDefault(d => d.IsSecondary) ?? displays.OrderByDescending(d => d.X).First(),
+        };
     }
 
     private void OnWinEvent(IntPtr hook, uint @event, IntPtr hwnd,

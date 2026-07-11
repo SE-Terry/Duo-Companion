@@ -1,42 +1,23 @@
-# Duo Companion — Setup Guide
+# Duo Companion — Build from Source
 
-Do all of this **on your Surface Duo** (Windows 11 ARM).
-
----
-
-## Step 1 — Download the ZIP
-
-Go to: `https://github.com/SE-Terry/Surface-Duo-HSOSK`
-
-Click **Code → Download ZIP**, then save it somewhere on the Duo (e.g. `Downloads`).
+> Just want to run the app? Grab the prebuilt release instead — see the main [README](README.md#download-and-run). This guide is for building the project yourself.
 
 ---
 
-## Step 2 — Extract
+## Prerequisites
 
-Right-click the ZIP → **Extract All** → choose a destination, e.g.:
+Install these on the machine you're building on (or the Surface Duo itself, if building on-device):
 
-```
-C:\Users\<you>\Documents\DuoCompanion
-```
+### Option A — Visual Studio (recommended)
 
----
+- [Visual Studio 2022 17.8+](https://visualstudio.microsoft.com/) with:
+  - `.NET Desktop Development` workload
+  - `Windows App SDK C# Templates` (Individual Components → search "Windows App SDK")
 
-## Step 3 — Install Prerequisites
-
-You only need to do this once.
-
-### Install .NET 9 SDK
-
-Open **Terminal** or **PowerShell** and run:
+### Option B — CLI only
 
 ```powershell
 winget install Microsoft.DotNet.SDK.9
-```
-
-### Install Windows App SDK Runtime
-
-```powershell
 winget install Microsoft.WindowsAppRuntime.1.6
 ```
 
@@ -44,49 +25,56 @@ If `winget` isn't available, download both manually:
 - .NET 9 SDK (ARM64): https://dotnet.microsoft.com/download/dotnet/9.0
 - Windows App SDK 1.6: https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads
 
-> Restart Terminal after installing so the `dotnet` command is recognized.
+> Restart your terminal after installing so the `dotnet` command is recognized.
+
+**Note:** the `dotnet` CLI's MSBuild cannot resolve the project's COM reference (`ResolveComReference`, used for UI Automation) or the AppX resource-packaging tasks. Building via `dotnet build`/`dotnet publish` alone will fail on `DuoCompanion.Services` and on PRI generation — use Visual Studio (or its MSBuild.exe) for a full build, or the `Windows App SDK C# Templates` component specifically provides the missing tooling if you're building from the CLI.
 
 ---
 
-## Step 4 — Build
+## Get the Source
 
-Open Terminal in the extracted folder (right-click the folder → **Open in Terminal**), then run:
+```powershell
+git clone https://github.com/SE-Terry/Surface-Duo-HSOSK.git
+cd Surface-Duo-HSOSK
+```
+
+Or download and extract the ZIP from **Code → Download ZIP** on GitHub.
+
+---
+
+## Build
+
+### Visual Studio
+
+1. Open `DuoCompanion.sln`
+2. Set configuration: **Release | ARM64**
+3. **Build → Build Solution** (`Ctrl+Shift+B`)
+4. Press `F5` or **Debug → Start Without Debugging**
+
+### Command Line
 
 ```powershell
 dotnet build DuoCompanion.sln -c Release -r win-arm64
 ```
 
-This downloads NuGet packages and compiles everything. It takes 1–3 minutes on first run.
-
-When it finishes you should see:
-
+Output:
 ```
-Build succeeded.
+src\DuoCompanion.App\bin\ARM64\Release\net9.0-windows10.0.19041.0\DuoCompanion.exe
 ```
 
----
-
-## Step 5 — Run
+Run directly — no installer or MSIX required:
 
 ```powershell
-.\src\DuoCompanion.App\bin\ARM64\Release\net9.0-windows10.0.19041.0\win-arm64\DuoCompanion.exe
+.\src\DuoCompanion.App\bin\ARM64\Release\net9.0-windows10.0.19041.0\DuoCompanion.exe
 ```
-
-No installer required — just run the `.exe` directly.
 
 ---
 
-## First-Run Checklist
+## Tests
 
-**Handwriting not working?**
-Go to **Windows Settings → Optional Features → Add a feature** → search `Handwriting` → Install.  
-Without it the handwriting page will show "No handwriting recognizer installed" and do nothing.
-
-**Window appeared on the wrong screen?**
-Fold and unfold the device once. The app detects the display change and repositions itself automatically.
-
-**App won't start / "runtime not found" error?**
-Re-run Step 3 to make sure the Windows App SDK Runtime is installed.
+```powershell
+dotnet test tests\DuoCompanion.Tests\DuoCompanion.Tests.csproj
+```
 
 ---
 
@@ -94,6 +82,32 @@ Re-run Step 3 to make sure the Windows App SDK Runtime is installed.
 
 When a new version is available:
 
-1. Download the new ZIP and extract it (overwrite the old folder)
-2. Run `dotnet build DuoCompanion.sln -c Release -r win-arm64` again
+1. `git pull` (or download and extract the new ZIP, overwriting the old folder)
+2. Rebuild: `dotnet build DuoCompanion.sln -c Release -r win-arm64`
 3. Run the `.exe` — no reinstall needed
+
+---
+
+## Project Structure
+
+```
+DuoCompanion.sln
+├── src/
+│   ├── DuoCompanion.App        # WinUI 3 UI — pages, windows, view models
+│   ├── DuoCompanion.Core       # Models (DisplayInfo, ClipboardItem, AppSettings)
+│   ├── DuoCompanion.Contracts  # Service interfaces (IInputService, IClipboardService, …)
+│   └── DuoCompanion.Services   # Implementations — Win32 P/Invoke, ink, settings
+└── tests/
+    └── DuoCompanion.Tests      # xUnit unit tests (Core + Services)
+```
+
+---
+
+## Tech Stack
+
+- C# 13 / .NET 9 / WinUI 3 (Windows App SDK 1.6)
+- MVVM — CommunityToolkit.Mvvm 8.3.2
+- Win32 P/Invoke — `SetWinEventHook`, `SendInput`, `SetWindowPos`, IAccessible
+- `Windows.UI.Input.Inking` — handwriting recognition via `InkStrokeBuilder` + `InkRecognizerContainer`
+- `Windows.ApplicationModel.DataTransfer.Clipboard` — clipboard monitoring
+- Target: `net9.0-windows10.0.19041.0`, `win-arm64`, unpackaged (`WindowsPackageType=None`)

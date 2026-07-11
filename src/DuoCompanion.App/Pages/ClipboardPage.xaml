@@ -42,7 +42,7 @@
                         </Button>
                         <Button Grid.Column="1" Tag="{x:Bind Id}" Click="OnPinClick"
                                 ToolTipService.ToolTip="Pin">
-                            <FontIcon Glyph="{x:Bind IsPinned ? '&#xE840;' : '&#xE841;'}" FontSize="16"/>
+                            <FontIcon Glyph="{x:Bind PinGlyph}" FontSize="16"/>
                         </Button>
                         <Button Grid.Column="2" Tag="{x:Bind Id}" Click="OnRemoveClick"
                                 ToolTipService.ToolTip="Remove">

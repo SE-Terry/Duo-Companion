@@ -29,6 +29,16 @@
                 </ComboBox>
             </StackPanel>
 
+            <!-- Companion display -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Companion Display" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ComboBox x:Name="CompanionDisplayCombo" SelectionChanged="OnCompanionDisplayChanged" Width="200">
+                    <ComboBoxItem Content="Right screen" Tag="Right"/>
+                    <ComboBoxItem Content="Left screen"  Tag="Left"/>
+                    <ComboBoxItem Content="Auto (Windows secondary)" Tag="Auto"/>
+                </ComboBox>
+            </StackPanel>
+
             <!-- Opacity -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Window Opacity" Style="{StaticResource BodyStrongTextBlockStyle}"/>

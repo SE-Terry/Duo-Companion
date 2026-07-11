@@ -15,7 +15,11 @@
               Background="{ThemeResource NavigationViewTopPaneBackground}"
               BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
               BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="4" Padding="8,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" Padding="8,0">
                 <Button x:Name="BtnKeyboard"    Tag="Keyboard"    Click="OnNavClick" ToolTipService.ToolTip="Keyboard">
                     <FontIcon Glyph="&#xE765;" />
                 </Button>
@@ -31,11 +35,11 @@
                 <Button x:Name="BtnHandwrite"  Tag="Handwriting" Click="OnNavClick" ToolTipService.ToolTip="Handwriting">
                     <FontIcon Glyph="&#xED63;" />
                 </Button>
-                <Button x:Name="BtnSettings"   Tag="Settings"    Click="OnNavClick" ToolTipService.ToolTip="Settings"
-                        HorizontalAlignment="Right" Margin="Auto,0,0,0">
-                    <FontIcon Glyph="&#xE713;" />
-                </Button>
             </StackPanel>
+            <Button Grid.Column="1" x:Name="BtnSettings" Tag="Settings" Click="OnNavClick" ToolTipService.ToolTip="Settings"
+                    Margin="0,0,8,0">
+                <FontIcon Glyph="&#xE713;" />
+            </Button>
         </Grid>
 
         <!-- Module content frame -->

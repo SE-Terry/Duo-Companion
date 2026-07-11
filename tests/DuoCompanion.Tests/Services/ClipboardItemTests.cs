@@ -1,4 +1,5 @@
 using DuoCompanion.Core.Models;
+using Xunit;
 
 namespace DuoCompanion.Tests.Services;
 

@@ -42,7 +42,9 @@ public sealed class UiAutomationService : IUiAutomationService, IDisposable
     private void OnFocusEvent(IntPtr hook, uint @event, IntPtr hwnd,
         int idObject, int idChild, uint idThread, uint dwTime)
     {
-        _ = Task.Run(() => CheckFocusedElement(hwnd, idObject, idChild));
+        // Must run on this (STA) thread — IAccessible COM objects are apartment-affine,
+        // and calling them from a ThreadPool thread without CoInitializeEx crashes natively.
+        CheckFocusedElement(hwnd, idObject, idChild);
     }
 
     private void CheckFocusedElement(IntPtr hwnd, int idObject, int idChild)
@@ -54,8 +56,7 @@ public sealed class UiAutomationService : IUiAutomationService, IDisposable
 
             if (hr != 0 || accObj is not Accessibility.IAccessible acc) return;
 
-            var roleVariant = new object();
-            acc.get_accRole(idChild, out roleVariant);
+            object roleVariant = acc.get_accRole(idChild);
             var role = Convert.ToUInt32(roleVariant);
 
             // ROLE_SYSTEM_TEXT = 42, ROLE_SYSTEM_DOCUMENT = 15

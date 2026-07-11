@@ -74,7 +74,7 @@ public sealed partial class CompanionWindow : Window
         Activated -= OnFirstActivated;
         var hwnd = WindowNative.GetWindowHandle(this);
         _windowManager.StartMonitoring(hwnd);
-        _windowManager.PositionOnSecondaryDisplay(hwnd);
+        _windowManager.PositionCompanionWindow(hwnd);
         _automation.Start();
         NavigateTo(typeof(KeyboardPage));
     }
@@ -84,7 +84,7 @@ public sealed partial class CompanionWindow : Window
         DispatcherQueue.TryEnqueue(() =>
         {
             var hwnd = WindowNative.GetWindowHandle(this);
-            _windowManager.PositionOnSecondaryDisplay(hwnd);
+            _windowManager.PositionCompanionWindow(hwnd);
         });
     }
 

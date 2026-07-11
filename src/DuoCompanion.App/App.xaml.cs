@@ -15,11 +15,21 @@ namespace DuoCompanion.App;
 public partial class App : Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
+    public static CompanionWindow? CompanionWindow { get; private set; }
 
     public App()
     {
         InitializeComponent();
         Services = BuildServices();
+        UnhandledException += OnUnhandledException;
+    }
+
+    private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        Services.GetRequiredService<ILogger<App>>().LogCritical(e.Exception, "Unhandled exception on UI thread");
+        System.IO.File.AppendAllText(
+            System.IO.Path.Combine(AppContext.BaseDirectory, "crash.log"),
+            $"{DateTime.Now:O}{Environment.NewLine}{e.Exception}{Environment.NewLine}{new string('-', 40)}{Environment.NewLine}");
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
@@ -30,10 +40,10 @@ public partial class App : Application
         Services.GetRequiredService<IWindowManagerService>().DisplayConfigurationChanged +=
             (_, _) => orientation.Refresh();
 
-        var companion = new CompanionWindow(
+        CompanionWindow = new CompanionWindow(
             Services.GetRequiredService<IWindowManagerService>(),
             Services.GetRequiredService<IUiAutomationService>());
-        companion.Activate();
+        CompanionWindow.Activate();
     }
 
     private static IServiceProvider BuildServices()
