@@ -1,0 +1,34 @@
+<Page x:Class="DuoCompanion.App.Pages.MediaPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="24">
+
+        <!-- Playback row -->
+        <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center">
+            <Button x:Name="BtnPrev"    Width="72" Height="72" Click="OnPrev"      ToolTipService.ToolTip="Previous">
+                <FontIcon Glyph="&#xE892;" FontSize="28"/>
+            </Button>
+            <Button x:Name="BtnPlay"    Width="88" Height="88" Click="OnPlayPause" ToolTipService.ToolTip="Play/Pause">
+                <FontIcon Glyph="&#xE769;" FontSize="36"/>
+            </Button>
+            <Button x:Name="BtnNext"    Width="72" Height="72" Click="OnNext"      ToolTipService.ToolTip="Next">
+                <FontIcon Glyph="&#xE893;" FontSize="28"/>
+            </Button>
+        </StackPanel>
+
+        <!-- Volume row -->
+        <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center">
+            <Button Width="64" Height="56" Click="OnVolumeDown" ToolTipService.ToolTip="Volume Down">
+                <FontIcon Glyph="&#xE993;" FontSize="22"/>
+            </Button>
+            <Button Width="64" Height="56" Click="OnMute"       ToolTipService.ToolTip="Mute">
+                <FontIcon Glyph="&#xE74F;" FontSize="22"/>
+            </Button>
+            <Button Width="64" Height="56" Click="OnVolumeUp"   ToolTipService.ToolTip="Volume Up">
+                <FontIcon Glyph="&#xE995;" FontSize="22"/>
+            </Button>
+        </StackPanel>
+
+    </StackPanel>
+</Page>

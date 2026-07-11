@@ -1,0 +1,44 @@
+<Page x:Class="DuoCompanion.App.Pages.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer Padding="16">
+        <StackPanel Spacing="16" MaxWidth="500">
+
+            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}"/>
+
+            <!-- Theme -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Theme" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ComboBox x:Name="ThemeCombo" SelectionChanged="OnThemeChanged" Width="200">
+                    <ComboBoxItem Content="System" Tag="System"/>
+                    <ComboBoxItem Content="Light"  Tag="Light"/>
+                    <ComboBoxItem Content="Dark"   Tag="Dark"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Default module -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Default Module" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ComboBox x:Name="DefaultModuleCombo" SelectionChanged="OnDefaultModuleChanged" Width="200">
+                    <ComboBoxItem Content="Keyboard"    Tag="Keyboard"/>
+                    <ComboBoxItem Content="Touchpad"    Tag="Touchpad"/>
+                    <ComboBoxItem Content="Clipboard"   Tag="Clipboard"/>
+                    <ComboBoxItem Content="Media"       Tag="Media"/>
+                    <ComboBoxItem Content="Handwriting" Tag="Handwriting"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Opacity -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Window Opacity" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <Slider x:Name="OpacitySlider"
+                        Minimum="0.3" Maximum="1.0" StepFrequency="0.05"
+                        ValueChanged="OnOpacityChanged" Width="300"/>
+            </StackPanel>
+
+            <Button Content="Reset to Defaults" Click="OnReset" Margin="0,8,0,0"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

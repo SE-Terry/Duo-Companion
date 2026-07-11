@@ -1,0 +1,86 @@
+<Page x:Class="DuoCompanion.App.Pages.KeyboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Padding="8" RowSpacing="6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: number row -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+            <Button Tag="49"  Content="1" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="50"  Content="2" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="51"  Content="3" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="52"  Content="4" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="53"  Content="5" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="54"  Content="6" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="55"  Content="7" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="56"  Content="8" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="57"  Content="9" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="48"  Content="0" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="8"   Width="80"  Height="56" FontSize="18" Click="OnKeyClick">
+                <FontIcon Glyph="&#xE750;" FontSize="18"/>
+            </Button>
+        </StackPanel>
+
+        <!-- Row 1: QWERTY -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+            <Button Tag="81"  Content="Q" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="87"  Content="W" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="69"  Content="E" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="82"  Content="R" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="84"  Content="T" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="89"  Content="Y" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="85"  Content="U" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="73"  Content="I" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="79"  Content="O" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="80"  Content="P" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="13"  Content="↵" Width="80" Height="56" FontSize="18" Click="OnKeyClick"/>
+        </StackPanel>
+
+        <!-- Row 2: ASDF -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+            <Button Tag="65"  Content="A" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="83"  Content="S" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="68"  Content="D" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="70"  Content="F" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="71"  Content="G" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="72"  Content="H" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="74"  Content="J" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="75"  Content="K" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="76"  Content="L" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+        </StackPanel>
+
+        <!-- Row 3: ZXCV + Shift -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+            <Button x:Name="BtnShift" Tag="16" Width="80" Height="56" FontSize="18" Click="OnModifierClick">
+                <FontIcon Glyph="&#xE752;" FontSize="18"/>
+            </Button>
+            <Button Tag="90"  Content="Z" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="88"  Content="X" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="67"  Content="C" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="86"  Content="V" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="66"  Content="B" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="78"  Content="N" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+            <Button Tag="77"  Content="M" Width="56" Height="56" FontSize="18" Click="OnKeyClick"/>
+        </StackPanel>
+
+        <!-- Row 4: bottom row -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+            <Button x:Name="BtnCtrl" Tag="17" Content="Ctrl" Width="72" Height="56" FontSize="14" Click="OnModifierClick"/>
+            <Button x:Name="BtnAlt"  Tag="18" Content="Alt"  Width="72" Height="56" FontSize="14" Click="OnModifierClick"/>
+            <Button Tag="9"   Content="Tab" Width="72" Height="56" FontSize="14" Click="OnKeyClick"/>
+            <Button Tag="32"  Content="Space" Width="200" Height="56" FontSize="16" Click="OnKeyClick"/>
+            <Button Tag="37" Width="52" Height="56" Click="OnKeyClick"><FontIcon Glyph="&#xE76B;" FontSize="18"/></Button>
+            <Button Tag="38" Width="52" Height="56" Click="OnKeyClick"><FontIcon Glyph="&#xE70E;" FontSize="18"/></Button>
+            <Button Tag="40" Width="52" Height="56" Click="OnKeyClick"><FontIcon Glyph="&#xE70D;" FontSize="18"/></Button>
+            <Button Tag="39" Width="52" Height="56" Click="OnKeyClick"><FontIcon Glyph="&#xE76C;" FontSize="18"/></Button>
+            <Button x:Name="BtnWin" Tag="91" Content="Win" Width="72" Height="56" FontSize="14" Click="OnKeyClick"/>
+        </StackPanel>
+    </Grid>
+</Page>
