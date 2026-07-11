@@ -5,6 +5,7 @@ using DuoCompanion.Services.Display;
 using DuoCompanion.Services.Input;
 using DuoCompanion.Services.Media;
 using DuoCompanion.Services.Settings;
+using DuoCompanion.Services.Tray;
 using DuoCompanion.Services.Window;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -55,15 +56,28 @@ public partial class App : Application
 
             CompanionWindow = new CompanionWindow(
                 Services.GetRequiredService<IWindowManagerService>(),
-                Services.GetRequiredService<IUiAutomationService>());
+                Services.GetRequiredService<IUiAutomationService>(),
+                Services.GetRequiredService<ISettingsService>());
             CompanionWindow.Activate();
             WriteStartupLog("Companion window activated.");
+
+            var tray = Services.GetRequiredService<ITrayIconService>();
+            tray.ToggleVisibilityRequested += (_, _) => CompanionWindow?.ToggleVisibility();
+            tray.QuitRequested += (_, _) => Quit();
+            tray.Start();
+            WriteStartupLog("Tray icon started.");
         }
         catch (Exception ex)
         {
             WriteStartupLog($"Application launch failed:{Environment.NewLine}{ex}");
             throw;
         }
+    }
+
+    public static void Quit()
+    {
+        Services.GetRequiredService<ITrayIconService>().Stop();
+        Application.Current.Exit();
     }
 
     private static void WriteStartupLog(string message)
@@ -93,6 +107,7 @@ public partial class App : Application
         services.AddSingleton<IMediaService, MediaService>();
         services.AddSingleton<IOrientationService, OrientationService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<ITrayIconService, TrayIconService>();
         return services.BuildServiceProvider();
     }
 }

@@ -8,4 +8,5 @@ public sealed class AppSettings
     public double KeyboardButtonSize { get; set; } = 56;
     public double WindowOpacity { get; set; } = 1.0;
     public string CompanionDisplay { get; set; } = "Right"; // "Right", "Left", "Auto" (whichever Windows reports as secondary)
+    public string AutoHideMode { get; set; } = "Smart"; // "Off", "Smart", "Always"
 }

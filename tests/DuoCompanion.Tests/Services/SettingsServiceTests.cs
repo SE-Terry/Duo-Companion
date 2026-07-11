@@ -33,4 +33,19 @@ public sealed class AppSettingsTests
         settings.Theme = "Dark";
         Assert.Equal("Dark", settings.Theme);
     }
+
+    [Fact]
+    public void Default_auto_hide_mode_is_Smart()
+    {
+        var settings = new AppSettings();
+        Assert.Equal("Smart", settings.AutoHideMode);
+    }
+
+    [Fact]
+    public void AutoHideMode_is_mutable()
+    {
+        var settings = new AppSettings();
+        settings.AutoHideMode = "Always";
+        Assert.Equal("Always", settings.AutoHideMode);
+    }
 }

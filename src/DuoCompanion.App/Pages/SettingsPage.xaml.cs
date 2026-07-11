@@ -37,6 +37,8 @@ public sealed partial class SettingsPage : Page
 
         CompanionDisplayCombo.SelectedIndex = s.CompanionDisplay switch { "Left" => 1, "Auto" => 2, _ => 0 };
 
+        AutoHideModeCombo.SelectedIndex = s.AutoHideMode switch { "Off" => 0, "Always" => 2, _ => 1 };
+
         OpacitySlider.Value = s.WindowOpacity;
         _loading = false;
     }
@@ -65,6 +67,13 @@ public sealed partial class SettingsPage : Page
             _windowManager.PositionCompanionWindow(WindowNative.GetWindowHandle(App.CompanionWindow));
     }
 
+    private void OnAutoHideModeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || AutoHideModeCombo.SelectedItem is not ComboBoxItem { Tag: string tag }) return;
+        _settings.Current.AutoHideMode = tag;
+        _settings.Save();
+    }
+
     private void OnOpacityChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading) return;
@@ -76,5 +85,10 @@ public sealed partial class SettingsPage : Page
     {
         _settings.Reset();
         OnLoaded(sender, new RoutedEventArgs());
+    }
+
+    private void OnQuit(object sender, RoutedEventArgs e)
+    {
+        App.Quit();
     }
 }

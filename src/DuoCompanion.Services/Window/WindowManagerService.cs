@@ -85,6 +85,19 @@ public sealed class WindowManagerService : IWindowManagerService, IDisposable
             target.X, target.Y, target.Width, target.Height);
     }
 
+    public void HideCompanionWindow(IntPtr hwnd)
+    {
+        NativeMethods.ShowWindow(hwnd, NativeMethods.SW_HIDE);
+        _logger.LogInformation("Companion window hidden");
+    }
+
+    public void ShowCompanionWindow(IntPtr hwnd)
+    {
+        PositionCompanionWindow(hwnd);
+        NativeMethods.ShowWindow(hwnd, NativeMethods.SW_SHOWNOACTIVATE);
+        _logger.LogInformation("Companion window shown");
+    }
+
     private DisplayInfo? SelectCompanionDisplay()
     {
         var displays = _display.GetAllDisplays();

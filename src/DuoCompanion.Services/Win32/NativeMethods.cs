@@ -78,6 +78,14 @@ internal static class NativeMethods
         IntPtr hwnd, int idObject, int idChild,
         uint idEventThread, uint dwmsEventTime);
 
+    // --- Window visibility (auto-hide) ---
+
+    internal const int SW_HIDE = 0;
+    internal const int SW_SHOWNOACTIVATE = 4;
+
+    [DllImport("user32.dll")]
+    internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
     // --- Keyboard/mouse injection (Tasks 3 + 9) ---
 
     internal const uint INPUT_MOUSE = 0;

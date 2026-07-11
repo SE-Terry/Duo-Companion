@@ -39,6 +39,16 @@
                 </ComboBox>
             </StackPanel>
 
+            <!-- Auto-hide -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Auto-hide" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ComboBox x:Name="AutoHideModeCombo" SelectionChanged="OnAutoHideModeChanged" Width="200">
+                    <ComboBoxItem Content="Off"    Tag="Off"/>
+                    <ComboBoxItem Content="Smart"  Tag="Smart"/>
+                    <ComboBoxItem Content="Always" Tag="Always"/>
+                </ComboBox>
+            </StackPanel>
+
             <!-- Opacity -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Window Opacity" Style="{StaticResource BodyStrongTextBlockStyle}"/>
@@ -48,6 +58,7 @@
             </StackPanel>
 
             <Button Content="Reset to Defaults" Click="OnReset" Margin="0,8,0,0"/>
+            <Button Content="Quit Duo Companion" Click="OnQuit"/>
 
         </StackPanel>
     </ScrollViewer>

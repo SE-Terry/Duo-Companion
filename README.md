@@ -18,6 +18,7 @@ The app **does not replace Windows** and **does not modify the system touch keyb
 | Media controls | Works | Play/Pause, Next/Prev, Volume Up/Down/Mute |
 | Settings persistence | Works | Saved to `%LOCALAPPDATA%\DuoCompanion\settings.json` |
 | Auto-show keyboard on focus | Partial | Detects Win32 text fields (Notepad, browsers); may miss modern UWP/XAML apps |
+| Auto-hide when unfocused | Works | Configurable in Settings → Auto-hide: Off (always visible), Smart (hides only when idle, stays open if you've manually opened Touchpad/Clipboard/etc.), Always (hides on blur from the keyboard; stays open if you're on a manually-opened page like Touchpad when focus moves away) |
 | Handwriting recognition | Conditional | Requires Handwriting Recognition optional feature (see below) |
 | Single-screen / folded mode | Safe | Logs a warning; no crash — window won't auto-position |
 
@@ -43,6 +44,14 @@ powershell -ExecutionPolicy Bypass -File .\Test-DuoCompanionRelease.ps1
    If missing, the handwriting page shows "No handwriting recognizer installed" and does nothing else.
 
 2. **Wrong screen**: If the companion window appears on the primary display at first launch, unfold/fold the device once — the display-change event will reposition it automatically.
+
+### Exiting the app
+
+Duo Companion has no title bar or taskbar entry by design (it's a
+non-activating overlay, like a system on-screen keyboard). Look for its
+icon in the system tray (bottom-right, primary screen) — left-click to
+show/hide the window, right-click for a Show/Hide and Quit menu. You can
+also quit from Settings → Quit Duo Companion.
 
 ---
 

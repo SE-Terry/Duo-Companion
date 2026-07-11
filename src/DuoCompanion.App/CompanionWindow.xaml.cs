@@ -10,8 +10,11 @@ public sealed partial class CompanionWindow : Window
 {
     private readonly IWindowManagerService _windowManager;
     private readonly IUiAutomationService _automation;
+    private readonly ISettingsService _settings;
     private readonly Frame _contentFrame = new();
+    private readonly DispatcherTimer _hideTimer = new() { Interval = TimeSpan.FromMilliseconds(200) };
     private Type _lastManualPage = typeof(KeyboardPage);
+    private bool _isHidden;
 
     private static readonly Dictionary<string, Type> _pageMap = new()
     {
@@ -23,16 +26,23 @@ public sealed partial class CompanionWindow : Window
         ["Settings"]    = typeof(SettingsPage),
     };
 
-    public CompanionWindow(IWindowManagerService windowManager, IUiAutomationService automation)
+    public CompanionWindow(IWindowManagerService windowManager, IUiAutomationService automation, ISettingsService settings)
     {
         _windowManager = windowManager;
         _automation    = automation;
+        _settings      = settings;
         InitializeComponent();
         Content = CreateContent();
 
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption =
             Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed;
+
+        _hideTimer.Tick += (_, _) =>
+        {
+            _hideTimer.Stop();
+            HideCompanionWindowNow();
+        };
 
         _automation.TextInputFocused += OnTextInputFocused;
         _automation.TextInputBlurred += OnTextInputBlurred;
@@ -47,6 +57,43 @@ public sealed partial class CompanionWindow : Window
             _contentFrame.Navigate(pageType);
     }
 
+    public void ToggleVisibility()
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (_isHidden)
+            {
+                NavigateTo(_lastManualPage);
+                ShowCompanionWindowNow();
+            }
+            else
+            {
+                HideCompanionWindowNow();
+            }
+        });
+    }
+
+    private void ShowCompanionWindowNow()
+    {
+        _hideTimer.Stop();
+        if (!_isHidden) return;
+        _windowManager.ShowCompanionWindow(WindowNative.GetWindowHandle(this));
+        _isHidden = false;
+    }
+
+    private void HideCompanionWindowNow()
+    {
+        if (_isHidden) return;
+        _windowManager.HideCompanionWindow(WindowNative.GetWindowHandle(this));
+        _isHidden = true;
+    }
+
+    private void HideCompanionWindowDebounced()
+    {
+        _hideTimer.Stop();
+        _hideTimer.Start();
+    }
+
     private void OnNavClick(object sender, RoutedEventArgs e)
     {
         if (sender is Button btn && btn.Tag is string tag && _pageMap.TryGetValue(tag, out var pageType))
@@ -58,16 +105,32 @@ public sealed partial class CompanionWindow : Window
 
     private void OnTextInputFocused(object? sender, EventArgs e)
     {
-        DispatcherQueue.TryEnqueue(() => NavigateTo(typeof(KeyboardPage)));
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            NavigateTo(typeof(KeyboardPage));
+            ShowCompanionWindowNow();
+        });
     }
 
     private void OnTextInputBlurred(object? sender, EventArgs e)
     {
-        // Only revert if user hadn't manually switched away from keyboard
+        // Only act if the window is currently on the auto-triggered keyboard page —
+        // if the user manually pinned a different page, a background focus change
+        // elsewhere on the system shouldn't touch this window at all.
         DispatcherQueue.TryEnqueue(() =>
         {
-            if (_contentFrame.CurrentSourcePageType == typeof(KeyboardPage))
-                NavigateTo(_lastManualPage == typeof(KeyboardPage) ? typeof(KeyboardPage) : _lastManualPage);
+            if (_contentFrame.CurrentSourcePageType != typeof(KeyboardPage)) return;
+
+            var mode = _settings.Current.AutoHideMode;
+            var hasManualPin = _lastManualPage != typeof(KeyboardPage);
+
+            if (mode == "Always" || (mode == "Smart" && !hasManualPin))
+            {
+                HideCompanionWindowDebounced();
+                return;
+            }
+
+            NavigateTo(_lastManualPage);
         });
     }
 
