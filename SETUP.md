@@ -18,12 +18,12 @@ Install these on the machine you're building on (or the Surface Duo itself, if b
 
 ```powershell
 winget install Microsoft.DotNet.SDK.9
-winget install Microsoft.WindowsAppRuntime.1.6
+winget install Microsoft.WindowsAppRuntime.2
 ```
 
 If `winget` isn't available, download both manually:
 - .NET 9 SDK (ARM64): https://dotnet.microsoft.com/download/dotnet/9.0
-- Windows App SDK 1.6: https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads
+- Windows App SDK 2.2: https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads
 
 > Restart your terminal after installing so the `dotnet` command is recognized.
 
@@ -68,6 +68,18 @@ Run directly — no installer or MSIX required:
 .\src\DuoCompanion.App\bin\ARM64\Release\net9.0-windows10.0.19041.0\DuoCompanion.exe
 ```
 
+### Publish Release Package
+
+The prebuilt files in `dist/DuoCompanion-win-arm64/` must be produced on a **Windows** machine. WinUI 3 requires Windows Visual Studio / MSBuild tooling to compile XAML and publish the executable — this cannot be done from macOS or Linux.
+
+From a Windows machine with Visual Studio's Windows App SDK tooling installed (see [Prerequisites](#prerequisites)):
+
+```powershell
+dotnet publish src\DuoCompanion.App\DuoCompanion.App.csproj -c Release -r win-arm64 --self-contained false -o dist\DuoCompanion-win-arm64
+```
+
+Replace the contents of `dist/DuoCompanion-win-arm64` with the published output. Zip that folder to create the release artifact for GitHub Releases (`DuoCompanion-win-arm64.zip`).
+
 ---
 
 ## Tests
@@ -105,7 +117,7 @@ DuoCompanion.sln
 
 ## Tech Stack
 
-- C# 13 / .NET 9 / WinUI 3 (Windows App SDK 1.6)
+- C# 13 / .NET 9 / WinUI 3 (Windows App SDK 2.2)
 - MVVM — CommunityToolkit.Mvvm 8.3.2
 - Win32 P/Invoke — `SetWinEventHook`, `SendInput`, `SetWindowPos`, IAccessible
 - `Windows.UI.Input.Inking` — handwriting recognition via `InkStrokeBuilder` + `InkRecognizerContainer`

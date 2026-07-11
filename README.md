@@ -33,7 +33,7 @@ The app is unpackaged (no MSIX), so it runs directly from the extracted folder. 
 
 ```powershell
 winget install Microsoft.DotNet.Runtime.9
-winget install Microsoft.WindowsAppRuntime.1.6
+winget install Microsoft.WindowsAppRuntime.2
 ```
 
 ### First-Run Checklist
