@@ -8,7 +8,6 @@
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <ProjectPriFileName>resources.pri</ProjectPriFileName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DuoCompanion.App</RootNamespace>
@@ -28,5 +27,20 @@
     <ProjectReference Include="..\DuoCompanion.Contracts\DuoCompanion.Contracts.csproj" />
     <ProjectReference Include="..\DuoCompanion.Services\DuoCompanion.Services.csproj" />
   </ItemGroup>
+
+  <!--
+    Unpackaged (WindowsPackageType=None) WinUI3 apps can only resolve ms-appx:// XAML
+    resources from a PRI file literally named resources.pri next to the exe. The default
+    generated PRI is named $(TargetName).pri, and setting ProjectPriFileName directly
+    causes PRI generation to be skipped entirely for this project shape. So generate the
+    default-named PRI as usual and copy it to resources.pri after Build/Publish.
+  -->
+  <Target Name="CopyPriToResourcesPri" AfterTargets="Build;Publish">
+    <ItemGroup>
+      <_GeneratedPri Include="$(OutDir)$(TargetName).pri" Condition="Exists('$(OutDir)$(TargetName).pri')" />
+      <_GeneratedPri Include="$(PublishDir)$(TargetName).pri" Condition="'$(PublishDir)' != '' AND Exists('$(PublishDir)$(TargetName).pri')" />
+    </ItemGroup>
+    <Copy SourceFiles="%(_GeneratedPri.Identity)" DestinationFiles="%(_GeneratedPri.RootDir)%(_GeneratedPri.Directory)resources.pri" Condition="'@(_GeneratedPri)' != ''" />
+  </Target>
 
 </Project>
