@@ -15,18 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <COMReference Include="Accessibility">
-      <Guid>{1EA4DBF0-3C3B-11CF-810C-00AA00389B71}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>1</VersionMinor>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DuoCompanion.Core\DuoCompanion.Core.csproj" />
     <ProjectReference Include="..\DuoCompanion.Contracts\DuoCompanion.Contracts.csproj" />
   </ItemGroup>
