@@ -154,4 +154,14 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     internal static extern IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
+
+    // --- App/tray icon (extracted from a built-in Windows executable) ---
+
+    [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    internal static extern uint ExtractIconEx(
+        string lpszFile, int nIconIndex,
+        IntPtr[]? phiconLarge, IntPtr[]? phiconSmall, uint nIcons);
+
+    [DllImport("user32.dll")]
+    internal static extern bool DestroyIcon(IntPtr hIcon);
 }

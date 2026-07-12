@@ -1,5 +1,7 @@
 using DuoCompanion.App.Pages;
 using DuoCompanion.Contracts.Services;
+using DuoCompanion.Services.Win32;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinRT.Interop;
@@ -15,6 +17,7 @@ public sealed partial class CompanionWindow : Window
     private readonly DispatcherTimer _hideTimer = new() { Interval = TimeSpan.FromMilliseconds(200) };
     private Type _lastManualPage = typeof(KeyboardPage);
     private bool _isHidden;
+    private IntPtr _windowIconHandle;
 
     private static readonly Dictionary<string, Type> _pageMap = new()
     {
@@ -36,6 +39,10 @@ public sealed partial class CompanionWindow : Window
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.PreferredHeightOption =
             Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed;
+
+        _windowIconHandle = SystemIconSource.ExtractKeyboardIconHandle(small: false);
+        if (_windowIconHandle != IntPtr.Zero)
+            AppWindow.SetIcon(Win32Interop.GetIconIdFromIcon(_windowIconHandle));
 
         _hideTimer.Tick += (_, _) =>
         {
@@ -158,6 +165,8 @@ public sealed partial class CompanionWindow : Window
         _automation.Stop();
         _windowManager.DisplayConfigurationChanged -= OnDisplayConfigurationChanged;
         _windowManager.StopMonitoring();
+        SystemIconSource.DestroyIconHandle(_windowIconHandle);
+        _windowIconHandle = IntPtr.Zero;
     }
 
     private Grid CreateContent()

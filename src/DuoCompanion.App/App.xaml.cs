@@ -25,11 +25,24 @@ public partial class App : Application
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool SetProcessDpiAwarenessContext(IntPtr value);
 
+    // Held for the process lifetime — releasing it (e.g. by letting it get GC'd)
+    // would let a second instance start.
+    private static System.Threading.Mutex? _singleInstanceMutex;
+
     public static IServiceProvider Services { get; private set; } = null!;
     public static CompanionWindow? CompanionWindow { get; private set; }
 
     public App()
     {
+        _singleInstanceMutex = new System.Threading.Mutex(
+            initiallyOwned: true, "DuoCompanion.SingleInstance.Mutex", out var createdNew);
+        if (!createdNew)
+        {
+            // Another instance already owns the mutex — exit immediately, before any
+            // real initialization (services, windows, tray icon) has happened.
+            Environment.Exit(0);
+        }
+
         SetProcessDpiAwarenessContext(DpiAwarenessContextPerMonitorAwareV2);
         WriteStartupLog("App constructor started.");
         try
