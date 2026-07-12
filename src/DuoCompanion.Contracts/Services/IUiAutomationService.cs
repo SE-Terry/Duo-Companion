@@ -6,4 +6,5 @@ public interface IUiAutomationService
     event EventHandler TextInputBlurred;
     void Start(IntPtr hostHwnd);
     void Stop();
+    void SuppressBriefly();
 }

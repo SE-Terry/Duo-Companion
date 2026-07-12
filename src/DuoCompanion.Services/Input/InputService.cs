@@ -8,8 +8,13 @@ namespace DuoCompanion.Services.Input;
 public sealed class InputService : IInputService
 {
     private readonly ILogger<InputService> _logger;
+    private readonly IUiAutomationService _automation;
 
-    public InputService(ILogger<InputService> logger) => _logger = logger;
+    public InputService(ILogger<InputService> logger, IUiAutomationService automation)
+    {
+        _logger = logger;
+        _automation = automation;
+    }
 
     public void SendKey(ushort virtualKeyCode, bool isExtendedKey = false)
     {
@@ -86,6 +91,8 @@ public sealed class InputService : IInputService
 
     private void Send(NativeMethods.INPUT[] inputs)
     {
+        _automation.SuppressBriefly();
+
         var sent = NativeMethods.SendInput(
             (uint)inputs.Length,
             inputs,

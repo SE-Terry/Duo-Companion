@@ -10,9 +10,12 @@ public sealed class UiAutomationService : IUiAutomationService, IDisposable
     // UIA_ControlTypeIds: https://learn.microsoft.com/windows/win32/winauto/uiauto-controltype-ids
     private const int UIA_EditControlTypeId = 50004;
     private const int UIA_DocumentControlTypeId = 50030;
+    private static readonly TimeSpan SuppressionWindow = TimeSpan.FromMilliseconds(400);
 
     private readonly ILogger<UiAutomationService> _logger;
     private IntPtr _hostHwnd;
+    private IntPtr _lastTextFieldRootHwnd;
+    private DateTime _suppressUntilUtc;
     private IUIAutomation? _automation;
     private IUIAutomationFocusChangedEventHandler? _focusHandler;
 
@@ -40,36 +43,46 @@ public sealed class UiAutomationService : IUiAutomationService, IDisposable
         _automation = null;
     }
 
+    public void SuppressBriefly() => _suppressUntilUtc = DateTime.UtcNow + SuppressionWindow;
+
     // UIA delivers focus-changed callbacks on its own background thread, not the UI
     // thread — safe here since it only reads the element and raises events; callers
     // (CompanionWindow) marshal back via DispatcherQueue themselves.
     private void OnFocusChanged(IUIAutomationElement? element)
     {
-        if (element is null) return;
+        if (element is null || DateTime.UtcNow < _suppressUntilUtc) return;
 
         try
         {
             // CurrentNativeWindowHandle is declared as a 32-bit int by the UIA type
             // library even on 64-bit Windows; real window handles fit in it in practice.
             var hwnd = new IntPtr(element.CurrentNativeWindowHandle);
-            if (hwnd != IntPtr.Zero && NativeMethods.GetAncestor(hwnd, NativeMethods.GA_ROOT) == _hostHwnd)
-                return;
+            var root = hwnd != IntPtr.Zero ? NativeMethods.GetAncestor(hwnd, NativeMethods.GA_ROOT) : IntPtr.Zero;
+
+            if (root != IntPtr.Zero && root == _hostHwnd) return; // ignore our own UI
 
             var controlType = element.CurrentControlType;
             if (controlType is UIA_EditControlTypeId or UIA_DocumentControlTypeId)
             {
                 _logger.LogDebug("Text input focused (controlType={ControlType})", controlType);
+                _lastTextFieldRootHwnd = root;
                 TextInputFocused?.Invoke(this, EventArgs.Empty);
+                return;
             }
-            else
-            {
-                TextInputBlurred?.Invoke(this, EventArgs.Empty);
-            }
+
+            // UIA fires focus-changed events far more often than the legacy MSAA hook
+            // did — autocomplete popups, caret helpers, and per-keystroke re-validation
+            // in rich editors/WebView2 all raise transient, non-text focus events while
+            // the user is still actively typing in the same field. Only treat this as
+            // actually leaving text input if focus moved to a different top-level
+            // window; same-window noise must not hide the keyboard mid-sentence.
+            if (root == IntPtr.Zero || root == _lastTextFieldRootHwnd) return;
+
+            TextInputBlurred?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "Error checking focused element");
-            TextInputBlurred?.Invoke(this, EventArgs.Empty);
         }
     }
 
