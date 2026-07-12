@@ -15,11 +15,22 @@ namespace DuoCompanion.App;
 
 public partial class App : Application
 {
+    // -4 = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2. Set this way instead of via
+    // app.manifest: a hand-authored manifest on this unpackaged WindowsAppSDK project
+    // replaces the SDK's own build-generated manifest (needed for regfree WinRT/COM
+    // activation) instead of merging with it, which breaks launch entirely with a
+    // "side-by-side configuration is incorrect" error.
+    private static readonly IntPtr DpiAwarenessContextPerMonitorAwareV2 = new(-4);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetProcessDpiAwarenessContext(IntPtr value);
+
     public static IServiceProvider Services { get; private set; } = null!;
     public static CompanionWindow? CompanionWindow { get; private set; }
 
     public App()
     {
+        SetProcessDpiAwarenessContext(DpiAwarenessContextPerMonitorAwareV2);
         WriteStartupLog("App constructor started.");
         try
         {
