@@ -22,7 +22,6 @@
                 <TextBlock Text="Default Module" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <ComboBox x:Name="DefaultModuleCombo" SelectionChanged="OnDefaultModuleChanged" Width="200">
                     <ComboBoxItem Content="Keyboard"    Tag="Keyboard"/>
-                    <ComboBoxItem Content="Touchpad"    Tag="Touchpad"/>
                     <ComboBoxItem Content="Clipboard"   Tag="Clipboard"/>
                     <ComboBoxItem Content="Media"       Tag="Media"/>
                     <ComboBoxItem Content="Handwriting" Tag="Handwriting"/>

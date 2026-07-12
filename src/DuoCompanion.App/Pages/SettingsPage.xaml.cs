@@ -31,8 +31,7 @@ public sealed partial class SettingsPage : Page
 
         DefaultModuleCombo.SelectedIndex = s.DefaultModule switch
         {
-            "Touchpad"    => 1, "Clipboard" => 2,
-            "Media"       => 3, "Handwriting" => 4, _ => 0
+            "Clipboard" => 1, "Media" => 2, "Handwriting" => 3, _ => 0
         };
 
         CompanionDisplayCombo.SelectedIndex = s.CompanionDisplay switch { "Left" => 1, "Auto" => 2, _ => 0 };

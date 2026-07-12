@@ -12,6 +12,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DuoCompanion.App</RootNamespace>
     <AssemblyName>DuoCompanion</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

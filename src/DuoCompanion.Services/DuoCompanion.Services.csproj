@@ -15,6 +15,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <COMReference Include="UIAutomationClient">
+      <Guid>{944DE083-8FB8-45CF-BCB7-C477ACB2F897}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DuoCompanion.Core\DuoCompanion.Core.csproj" />
     <ProjectReference Include="..\DuoCompanion.Contracts\DuoCompanion.Contracts.csproj" />
   </ItemGroup>

@@ -103,7 +103,6 @@ public partial class App : Application
         services.AddSingleton<IInputService, InputService>();
         services.AddSingleton<IUiAutomationService, UiAutomationService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
-        services.AddSingleton<IMouseService, MouseService>();
         services.AddSingleton<IMediaService, MediaService>();
         services.AddSingleton<IOrientationService, OrientationService>();
         services.AddSingleton<ISettingsService, SettingsService>();

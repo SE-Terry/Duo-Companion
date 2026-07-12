@@ -19,7 +19,6 @@ public sealed partial class CompanionWindow : Window
     private static readonly Dictionary<string, Type> _pageMap = new()
     {
         ["Keyboard"]    = typeof(KeyboardPage),
-        ["Touchpad"]    = typeof(TouchpadPage),
         ["Clipboard"]   = typeof(ClipboardPage),
         ["Media"]       = typeof(MediaPage),
         ["Handwriting"] = typeof(HandwritingPage),
@@ -141,7 +140,7 @@ public sealed partial class CompanionWindow : Window
         _windowManager.StartMonitoring(hwnd);
         _windowManager.PositionCompanionWindow(hwnd);
         _windowManager.MakeWindowNonActivating(hwnd);
-        _automation.Start();
+        _automation.Start(hwnd);
         NavigateTo(typeof(KeyboardPage));
     }
 
@@ -178,7 +177,6 @@ public sealed partial class CompanionWindow : Window
             Padding = new Thickness(8, 0, 8, 0)
         };
         navigationButtons.Children.Add(CreateNavigationButton("Keyboard", "Keyboard", "\uE765"));
-        navigationButtons.Children.Add(CreateNavigationButton("Touchpad", "Touchpad", "\uE7C5"));
         navigationButtons.Children.Add(CreateNavigationButton("Clipboard", "Clipboard", "\uE77F"));
         navigationButtons.Children.Add(CreateNavigationButton("Media", "Media", "\uE768"));
         navigationButtons.Children.Add(CreateNavigationButton("Handwriting", "Handwriting", "\uED63"));

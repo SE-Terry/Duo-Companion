@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace DuoCompanion.Services.Win32;
 
@@ -151,16 +150,8 @@ internal static class NativeMethods
 
     // --- UI Automation focus tracking (Task 5) ---
 
-    internal const uint EVENT_OBJECT_FOCUS = 0x8005;
-    internal const uint EVENT_OBJECT_STATECHANGE = 0x800A;
-    internal const int OBJID_CLIENT = 0x00000000;
+    internal const uint GA_ROOT = 2;
 
-    [DllImport("oleacc.dll")]
-    internal static extern int AccessibleObjectFromEvent(
-        IntPtr hwnd, int idObject, int idChild,
-        [MarshalAs(UnmanagedType.IUnknown)] out object? ppvObject,
-        out int varChild);
-
-    [DllImport("oleacc.dll")]
-    internal static extern int GetRoleText(uint dwRole, StringBuilder lpszRole, uint cchRoleMax);
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
 }

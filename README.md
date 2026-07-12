@@ -14,11 +14,10 @@ The app **does not replace Windows** and **does not modify the system touch keyb
 | Window on secondary display | Works | Auto-positions at startup; repositions on display change |
 | Virtual keyboard + key injection | Works | Full QWERTY, modifier toggles, arrow/special keys |
 | Clipboard history + paste | Works | 50-item history, pin/remove, Ctrl+V injection |
-| Touchpad (mouse control) | Works | Drag to move, pinch to scroll, tap/right-tap to click |
 | Media controls | Works | Play/Pause, Next/Prev, Volume Up/Down/Mute |
 | Settings persistence | Works | Saved to `%LOCALAPPDATA%\DuoCompanion\settings.json` |
-| Auto-show keyboard on focus | Partial | Detects Win32 text fields (Notepad, browsers); may miss modern UWP/XAML apps |
-| Auto-hide when unfocused | Works | Configurable in Settings → Auto-hide: Off (always visible), Smart (hides only when idle, stays open if you've manually opened Touchpad/Clipboard/etc.), Always (hides on blur from the keyboard; stays open if you're on a manually-opened page like Touchpad when focus moves away) |
+| Auto-show keyboard on focus | Works | Uses UI Automation focus tracking — covers native Win32, UWP, WinUI3, and Chromium/Edge text fields |
+| Auto-hide when unfocused | Works | Configurable in Settings → Auto-hide: Off (always visible), Smart (hides only when idle, stays open if you've manually opened Clipboard/Media/etc.), Always (hides on blur from the keyboard; stays open if you're on a manually-opened page when focus moves away) |
 | Handwriting recognition | Conditional | Requires Handwriting Recognition optional feature (see below) |
 | Single-screen / folded mode | Safe | Logs a warning; no crash — window won't auto-position |
 

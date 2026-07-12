@@ -4,6 +4,6 @@ public interface IUiAutomationService
 {
     event EventHandler TextInputFocused;
     event EventHandler TextInputBlurred;
-    void Start();
+    void Start(IntPtr hostHwnd);
     void Stop();
 }

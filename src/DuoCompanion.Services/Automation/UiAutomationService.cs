@@ -1,68 +1,64 @@
-using System.Runtime.InteropServices;
-using Accessibility;
 using DuoCompanion.Contracts.Services;
 using DuoCompanion.Services.Win32;
 using Microsoft.Extensions.Logging;
+using UIAutomationClient;
 
 namespace DuoCompanion.Services.Automation;
 
 public sealed class UiAutomationService : IUiAutomationService, IDisposable
 {
+    // UIA_ControlTypeIds: https://learn.microsoft.com/windows/win32/winauto/uiauto-controltype-ids
+    private const int UIA_EditControlTypeId = 50004;
+    private const int UIA_DocumentControlTypeId = 50030;
+
     private readonly ILogger<UiAutomationService> _logger;
-    private IntPtr _focusHook;
-    private NativeMethods.WinEventProc? _hookProc; // keep alive — GC can collect delegates
+    private IntPtr _hostHwnd;
+    private IUIAutomation? _automation;
+    private IUIAutomationFocusChangedEventHandler? _focusHandler;
 
     public event EventHandler? TextInputFocused;
     public event EventHandler? TextInputBlurred;
 
     public UiAutomationService(ILogger<UiAutomationService> logger) => _logger = logger;
 
-    public void Start()
+    public void Start(IntPtr hostHwnd)
     {
-        _hookProc = OnFocusEvent;
-        _focusHook = NativeMethods.SetWinEventHook(
-            NativeMethods.EVENT_OBJECT_FOCUS,
-            NativeMethods.EVENT_OBJECT_FOCUS,
-            IntPtr.Zero, _hookProc,
-            0, 0, NativeMethods.WINEVENT_OUTOFCONTEXT);
+        _hostHwnd = hostHwnd;
+        _automation = new CUIAutomation();
+        _focusHandler = new FocusChangedHandler(this);
+        _automation.AddFocusChangedEventHandler(null, _focusHandler);
 
         _logger.LogInformation("UI Automation focus monitoring started");
     }
 
     public void Stop()
     {
-        if (_focusHook != IntPtr.Zero)
-        {
-            NativeMethods.UnhookWinEvent(_focusHook);
-            _focusHook = IntPtr.Zero;
-        }
-        _hookProc = null;
+        if (_automation is not null && _focusHandler is not null)
+            _automation.RemoveFocusChangedEventHandler(_focusHandler);
+
+        _focusHandler = null;
+        _automation = null;
     }
 
-    private void OnFocusEvent(IntPtr hook, uint @event, IntPtr hwnd,
-        int idObject, int idChild, uint idThread, uint dwTime)
+    // UIA delivers focus-changed callbacks on its own background thread, not the UI
+    // thread — safe here since it only reads the element and raises events; callers
+    // (CompanionWindow) marshal back via DispatcherQueue themselves.
+    private void OnFocusChanged(IUIAutomationElement? element)
     {
-        // Must run on this (STA) thread — IAccessible COM objects are apartment-affine,
-        // and calling them from a ThreadPool thread without CoInitializeEx crashes natively.
-        CheckFocusedElement(hwnd, idObject, idChild);
-    }
+        if (element is null) return;
 
-    private void CheckFocusedElement(IntPtr hwnd, int idObject, int idChild)
-    {
         try
         {
-            var hr = NativeMethods.AccessibleObjectFromEvent(hwnd, idObject, idChild,
-                out var accObj, out _);
+            // CurrentNativeWindowHandle is declared as a 32-bit int by the UIA type
+            // library even on 64-bit Windows; real window handles fit in it in practice.
+            var hwnd = new IntPtr(element.CurrentNativeWindowHandle);
+            if (hwnd != IntPtr.Zero && NativeMethods.GetAncestor(hwnd, NativeMethods.GA_ROOT) == _hostHwnd)
+                return;
 
-            if (hr != 0 || accObj is not Accessibility.IAccessible acc) return;
-
-            object roleVariant = acc.get_accRole(idChild);
-            var role = Convert.ToUInt32(roleVariant);
-
-            // ROLE_SYSTEM_TEXT = 42, ROLE_SYSTEM_DOCUMENT = 15
-            if (role is 42 or 15)
+            var controlType = element.CurrentControlType;
+            if (controlType is UIA_EditControlTypeId or UIA_DocumentControlTypeId)
             {
-                _logger.LogDebug("Text input focused (role={Role})", role);
+                _logger.LogDebug("Text input focused (controlType={ControlType})", controlType);
                 TextInputFocused?.Invoke(this, EventArgs.Empty);
             }
             else
@@ -73,8 +69,19 @@ public sealed class UiAutomationService : IUiAutomationService, IDisposable
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "Error checking focused element");
+            TextInputBlurred?.Invoke(this, EventArgs.Empty);
         }
     }
 
     public void Dispose() => Stop();
+
+    private sealed class FocusChangedHandler : IUIAutomationFocusChangedEventHandler
+    {
+        private readonly UiAutomationService _owner;
+
+        public FocusChangedHandler(UiAutomationService owner) => _owner = owner;
+
+        public void HandleFocusChangedEvent(IUIAutomationElement sender) =>
+            _owner.OnFocusChanged(sender);
+    }
 }
