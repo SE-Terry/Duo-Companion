@@ -1,0 +1,12 @@
+<Window
+    x:Class="DuoCompanion.App.SpanOverlayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="DuoSnap">
+
+    <Grid Background="#FF00A2FF">
+        <TextBlock Text="Drop to Span"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="28" Foreground="White"/>
+    </Grid>
+</Window>

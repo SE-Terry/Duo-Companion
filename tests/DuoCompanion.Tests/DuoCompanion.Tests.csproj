@@ -17,5 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DuoCompanion.Core\DuoCompanion.Core.csproj" />
+    <ProjectReference Include="..\..\src\DuoCompanion.Contracts\DuoCompanion.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\DuoCompanion.Services\DuoCompanion.Services.csproj" />
   </ItemGroup>
 </Project>

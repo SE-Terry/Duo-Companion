@@ -66,6 +66,31 @@ public sealed class WindowManagerService : IWindowManagerService, IDisposable
         _logger.LogInformation("Companion window configured to preserve the active application");
     }
 
+    public void MakeWindowClickThrough(IntPtr hwnd)
+    {
+        var extendedStyle = NativeMethods.GetWindowLongPtr(hwnd, NativeMethods.GWL_EXSTYLE);
+        NativeMethods.SetWindowLongPtr(
+            hwnd,
+            NativeMethods.GWL_EXSTYLE,
+            extendedStyle | NativeMethods.WS_EX_TRANSPARENT | NativeMethods.WS_EX_LAYERED | NativeMethods.WS_EX_NOACTIVATE);
+
+        NativeMethods.SetLayeredWindowAttributes(hwnd, 0, 255, NativeMethods.LWA_ALPHA);
+    }
+
+    public void SetWindowOpacity(IntPtr hwnd, double opacity)
+    {
+        var alpha = (byte)Math.Round(Math.Clamp(opacity, 0, 1) * byte.MaxValue);
+        NativeMethods.SetLayeredWindowAttributes(hwnd, 0, alpha, NativeMethods.LWA_ALPHA);
+    }
+
+    public void SetWindowBounds(IntPtr hwnd, int left, int top, int width, int height)
+    {
+        NativeMethods.SetWindowPos(
+            hwnd, NativeMethods.HWND_TOPMOST,
+            left, top, width, height,
+            (uint)NativeMethods.SWP_NOACTIVATE);
+    }
+
     public void PositionCompanionWindow(IntPtr hwnd)
     {
         var target = SelectCompanionDisplay();

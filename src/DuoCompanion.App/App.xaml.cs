@@ -5,11 +5,13 @@ using DuoCompanion.Services.Display;
 using DuoCompanion.Services.Input;
 using DuoCompanion.Services.Media;
 using DuoCompanion.Services.Settings;
+using DuoCompanion.Services.Snap;
 using DuoCompanion.Services.Tray;
 using DuoCompanion.Services.Window;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
+using WinRT.Interop;
 
 namespace DuoCompanion.App;
 
@@ -31,6 +33,7 @@ public partial class App : Application
 
     public static IServiceProvider Services { get; private set; } = null!;
     public static CompanionWindow? CompanionWindow { get; private set; }
+    private static SpanOverlayWindow? _spanOverlayWindow;
 
     public App()
     {
@@ -74,6 +77,11 @@ public partial class App : Application
         {
             Services.GetRequiredService<IClipboardService>().Initialize();
 
+            var settingsService = Services.GetRequiredService<ISettingsService>();
+            var startup = Services.GetRequiredService<IStartupRegistrationService>();
+            if (!startup.Apply(settingsService.Current.LaunchOnStartup))
+                WriteStartupLog("Startup registration reconciliation failed — see application log for details.");
+
             var orientation = Services.GetRequiredService<IOrientationService>();
             Services.GetRequiredService<IWindowManagerService>().DisplayConfigurationChanged +=
                 (_, _) => orientation.Refresh();
@@ -81,7 +89,7 @@ public partial class App : Application
             CompanionWindow = new CompanionWindow(
                 Services.GetRequiredService<IWindowManagerService>(),
                 Services.GetRequiredService<IUiAutomationService>(),
-                Services.GetRequiredService<ISettingsService>());
+                settingsService);
             CompanionWindow.Activate();
             WriteStartupLog("Companion window activated.");
 
@@ -90,6 +98,35 @@ public partial class App : Application
             tray.QuitRequested += (_, _) => Quit();
             tray.Start();
             WriteStartupLog("Tray icon started.");
+
+            _spanOverlayWindow = new SpanOverlayWindow(Services.GetRequiredService<IWindowManagerService>());
+            var overlay = _spanOverlayWindow;
+            var autoSpan = Services.GetRequiredService<IAutoSpanCoordinatorService>();
+            var settingsMonitor = Services.GetRequiredService<IDuoSnapSettingsMonitor>();
+            autoSpan.SpanCandidateEntered += (_, e) => overlay.DispatcherQueue.TryEnqueue(() =>
+            {
+                var settings = settingsMonitor.Current;
+                if (settings.AutoSpanEnabled)
+                    overlay.ShowAt(e.Target, settings.OverlayOpacity, settings.FadeDurationMilliseconds);
+            });
+            autoSpan.SpanCandidateExited += (_, _) => overlay.DispatcherQueue.TryEnqueue(() =>
+            {
+                var settings = settingsMonitor.Current;
+                overlay.HideOverlay(settings.FadeDurationMilliseconds);
+            });
+            settingsMonitor.Changed += (_, _) => overlay.DispatcherQueue.TryEnqueue(() =>
+            {
+                var settings = settingsMonitor.Current;
+                if (!settings.AutoSpanEnabled)
+                    overlay.HideOverlay(0);
+                else
+                    overlay.ApplySettings(settings.OverlayOpacity, settings.FadeDurationMilliseconds);
+            });
+            autoSpan.Start(WindowNative.GetWindowHandle(CompanionWindow));
+            WriteStartupLog("Auto-span coordinator started.");
+
+            Services.GetRequiredService<IGlobalHotkeyService>().Start();
+            WriteStartupLog("Global hotkey service started.");
         }
         catch (Exception ex)
         {
@@ -100,8 +137,18 @@ public partial class App : Application
 
     public static void Quit()
     {
+        Services.GetRequiredService<IGlobalHotkeyService>().Stop();
         Services.GetRequiredService<ITrayIconService>().Stop();
-        Application.Current.Exit();
+        Services.GetRequiredService<IAutoSpanCoordinatorService>().Stop();
+        var overlay = _spanOverlayWindow;
+        if (overlay is null || !overlay.DispatcherQueue.TryEnqueue(() =>
+            {
+                overlay.HideOverlay(0);
+                Application.Current.Exit();
+            }))
+        {
+            Application.Current.Exit();
+        }
     }
 
     private static void WriteStartupLog(string message)
@@ -130,7 +177,18 @@ public partial class App : Application
         services.AddSingleton<IMediaService, MediaService>();
         services.AddSingleton<IOrientationService, OrientationService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IDuoSnapSettingsMonitor, DuoSnapSettingsMonitor>();
         services.AddSingleton<ITrayIconService, TrayIconService>();
+        services.AddSingleton<IHingeTopologyService, HingeTopologyService>();
+        services.AddSingleton<IWindowIdentityService, WindowIdentityService>();
+        services.AddSingleton<IWindowTrackerService, WindowTrackerService>();
+        services.AddSingleton<IWindowSpanService, WindowSpanService>();
+        services.AddSingleton<IWindowsSnapIntegrationService, WindowsSnapIntegrationService>();
+        services.AddSingleton<IAppLayoutProfileService, AppLayoutProfileService>();
+        services.AddSingleton<ILayoutSuggestionService, LayoutSuggestionService>();
+        services.AddSingleton<IAutoSpanCoordinatorService, AutoSpanCoordinatorService>();
+        services.AddSingleton<IGlobalHotkeyService, GlobalHotkeyService>();
+        services.AddSingleton<IStartupRegistrationService, StartupRegistrationService>();
         return services.BuildServiceProvider();
     }
 }

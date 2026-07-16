@@ -48,9 +48,150 @@
                 </ComboBox>
             </StackPanel>
 
+            <!-- Launch on startup -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Startup" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ToggleSwitch x:Name="LaunchOnStartupToggle" Header="Launch Duo Companion when I sign in" Toggled="OnLaunchOnStartupToggled"/>
+            </StackPanel>
+
+            <!-- Auto Span -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Dual-Screen Spanning" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ToggleSwitch x:Name="AutoSpanToggle" Header="Enable Auto Span" Toggled="OnAutoSpanToggled"/>
+            </StackPanel>
+
+            <!-- Activation half-width -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Hinge Activation Half-Width" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="How close (in pixels, each side of the hinge) a drag must get to trigger a span. Valid range: 5-120 px."
+                           Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                <NumberBox x:Name="ActivationHalfWidthBox" Minimum="5" Maximum="120" SmallChange="1"
+                           SpinButtonPlacementMode="Compact" ValueChanged="OnActivationHalfWidthChanged" Width="200"/>
+            </StackPanel>
+
+            <!-- Span overlay opacity -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Span Overlay Opacity" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="Opacity of the preview shown while dragging toward the hinge. Valid range: 0.05-0.80."
+                           Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                <NumberBox x:Name="OverlayOpacityBox" Minimum="0.05" Maximum="0.80" SmallChange="0.05"
+                           SpinButtonPlacementMode="Compact" ValueChanged="OnOverlayOpacityChanged" Width="200"/>
+            </StackPanel>
+
+            <!-- Span overlay fade duration -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Span Overlay Fade Duration" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="Fade in/out time for the span preview, in milliseconds. Valid range: 0-1000 ms."
+                           Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                <NumberBox x:Name="FadeDurationBox" Minimum="0" Maximum="1000" SmallChange="10"
+                           SpinButtonPlacementMode="Compact" ValueChanged="OnFadeDurationChanged" Width="200"/>
+            </StackPanel>
+
+            <!-- Span dwell duration -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Span Dwell Duration" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="How long a drag must hover near the hinge before it is treated as a confirmed span gesture, in milliseconds. Valid range: 0-1500 ms."
+                           Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                <NumberBox x:Name="DwellDurationBox" Minimum="0" Maximum="1500" SmallChange="50"
+                           SpinButtonPlacementMode="Compact" ValueChanged="OnDwellDurationChanged" Width="200"/>
+            </StackPanel>
+
+            <!-- Restore behavior -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Restore Original Size" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ComboBox x:Name="RestoreBehaviorCombo" SelectionChanged="OnRestoreBehaviorChanged" Width="200">
+                    <ComboBoxItem Content="On next drag away from the hinge" Tag="OnNextDrag"/>
+                    <ComboBoxItem Content="Never (stay spanned)" Tag="Never"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Snap integration mode -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Windows Snap Integration" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <ComboBox x:Name="SnapIntegrationModeCombo" SelectionChanged="OnSnapIntegrationModeChanged" Width="320">
+                    <ComboBoxItem Content="Extend Windows Snap (hinge span only)" Tag="ExtendWindowsSnap"/>
+                    <ComboBoxItem Content="Replace Windows Snap (adds layout commands)" Tag="ReplaceWindowsSnap"/>
+                    <ComboBoxItem Content="Disabled manually (I already turned Windows Snap off)" Tag="WindowsSnapDisabledManually"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Ignored applications -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Ignored Applications" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="Windows whose executable name matches an entry below are never auto-spanned."
+                           Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                <ListView x:Name="IgnoredExeList" SelectionMode="Single" MaxHeight="150" BorderThickness="1"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBox x:Name="IgnoredExeInput" Width="200" PlaceholderText="e.g. notepad.exe"/>
+                    <Button Content="Add" Click="OnAddIgnoredExecutable"/>
+                    <Button Content="Remove Selected" Click="OnRemoveIgnoredExecutable"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Per-app layout profiles -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Per-App Layout Profiles" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="Assign the layout an app should always receive when spanned, or mark it ignored."
+                           Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                <ListView x:Name="ProfilesList" SelectionMode="Single" MaxHeight="150" BorderThickness="1"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBox x:Name="ProfileExeInput" Width="140" PlaceholderText="e.g. chrome.exe"/>
+                    <ComboBox x:Name="ProfileLayoutCombo" Width="150">
+                        <ComboBoxItem Content="Left" Tag="Left"/>
+                        <ComboBoxItem Content="Right" Tag="Right"/>
+                        <ComboBoxItem Content="Span" Tag="Span" IsSelected="True"/>
+                        <ComboBoxItem Content="Left 70 / Right 30" Tag="Left70Right30"/>
+                        <ComboBoxItem Content="Left 30 / Right 70" Tag="Left30Right70"/>
+                    </ComboBox>
+                    <CheckBox x:Name="ProfileIgnoredCheck" Content="Ignored"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Add / Update" Click="OnAddOrUpdateProfile"/>
+                    <Button Content="Remove Selected" Click="OnRemoveProfile"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Global hotkeys -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Global Hotkeys" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="Modifiers joined with '+' followed by a key, e.g. Ctrl+Alt+S. Leave blank to disable. Changes take effect after restarting Duo Companion."
+                           Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+
+                <Grid ColumnSpacing="8" RowSpacing="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="180"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Left" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="HotkeyLeftBox" Grid.Row="0" Grid.Column="1" Tag="Left" LostFocus="OnHotkeyBindingChanged"/>
+
+                    <TextBlock Text="Right" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="HotkeyRightBox" Grid.Row="1" Grid.Column="1" Tag="Right" LostFocus="OnHotkeyBindingChanged"/>
+
+                    <TextBlock Text="Span" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="HotkeySpanBox" Grid.Row="2" Grid.Column="1" Tag="Span" LostFocus="OnHotkeyBindingChanged"/>
+
+                    <TextBlock Text="Left 70/30" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="HotkeyLeft70Right30Box" Grid.Row="3" Grid.Column="1" Tag="Left70Right30" LostFocus="OnHotkeyBindingChanged"/>
+
+                    <TextBlock Text="Left 30/70" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="HotkeyLeft30Right70Box" Grid.Row="4" Grid.Column="1" Tag="Left30Right70" LostFocus="OnHotkeyBindingChanged"/>
+                </Grid>
+
+                <TextBlock x:Name="HotkeyStatusText" TextWrapping="Wrap"/>
+            </StackPanel>
+
             <!-- Opacity -->
             <StackPanel Spacing="4">
-                <TextBlock Text="Window Opacity" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="Companion Window Opacity" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <Slider x:Name="OpacitySlider"
                         Minimum="0.3" Maximum="1.0" StepFrequency="0.05"
                         ValueChanged="OnOpacityChanged" Width="300"/>
