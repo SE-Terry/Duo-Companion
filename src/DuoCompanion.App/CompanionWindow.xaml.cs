@@ -14,7 +14,7 @@ public sealed partial class CompanionWindow : Window
     private readonly IUiAutomationService _automation;
     private readonly ISettingsService _settings;
     private readonly Frame _contentFrame = new();
-    private readonly DispatcherTimer _hideTimer = new() { Interval = TimeSpan.FromMilliseconds(200) };
+    private readonly DispatcherTimer _hideTimer = new() { Interval = TimeSpan.FromMilliseconds(350) };
     private Type _lastManualPage = typeof(KeyboardPage);
     private bool _isHidden;
     private IntPtr _windowIconHandle;
@@ -191,11 +191,22 @@ public sealed partial class CompanionWindow : Window
         navigationButtons.Children.Add(CreateNavigationButton("Handwriting", "Handwriting", "\uED63"));
 
         var settingsButton = CreateNavigationButton("Settings", "Settings", "\uE713");
-        settingsButton.Margin = new Thickness(0, 0, 8, 0);
+
+        var hideButton = CreateNavigationButton("Hide", "Hide", "\uE921");
+        hideButton.Margin = new Thickness(0, 0, 8, 0);
+        hideButton.Click += (_, _) => HideCompanionWindowNow();
+
+        var rightButtons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 4
+        };
+        rightButtons.Children.Add(settingsButton);
+        rightButtons.Children.Add(hideButton);
 
         navigationBar.Children.Add(navigationButtons);
-        Grid.SetColumn(settingsButton, 1);
-        navigationBar.Children.Add(settingsButton);
+        Grid.SetColumn(rightButtons, 1);
+        navigationBar.Children.Add(rightButtons);
 
         root.Children.Add(navigationBar);
         Grid.SetRow(_contentFrame, 1);

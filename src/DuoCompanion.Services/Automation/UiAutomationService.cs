@@ -70,13 +70,15 @@ public sealed class UiAutomationService : IUiAutomationService, IDisposable
                 return;
             }
 
-            // UIA fires focus-changed events far more often than the legacy MSAA hook
-            // did — autocomplete popups, caret helpers, and per-keystroke re-validation
-            // in rich editors/WebView2 all raise transient, non-text focus events while
-            // the user is still actively typing in the same field. Only treat this as
-            // actually leaving text input if focus moved to a different top-level
-            // window; same-window noise must not hide the keyboard mid-sentence.
-            if (root == IntPtr.Zero || root == _lastTextFieldRootHwnd) return;
+            // Any focus target that isn't an edit/document control counts as blur,
+            // regardless of whether it's in the same top-level window as the last
+            // text field — a click on a button or empty space in the same app window
+            // is a legitimate "the user is done with this field" signal and must not
+            // be suppressed. The transient same-window noise this guard used to filter
+            // (autocomplete popups, caret helpers, per-keystroke re-validation in rich
+            // editors/WebView2) is instead absorbed by CompanionWindow's hide debounce:
+            // a fresh TextInputFocused cancels the pending hide before it fires.
+            if (root == IntPtr.Zero) return;
 
             TextInputBlurred?.Invoke(this, EventArgs.Empty);
         }
