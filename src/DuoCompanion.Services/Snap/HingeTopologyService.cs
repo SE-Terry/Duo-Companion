@@ -59,10 +59,37 @@ public sealed class HingeTopologyService : IHingeTopologyService, IDisposable
     private void Recompute()
     {
         var activationHalfWidth = _settings.Current.DuoSnap.ActivationHalfWidth;
-        CurrentTopology = HingeCalculator.ComputeDuoTopology(_display.GetAllDisplays(), activationHalfWidth);
+        var displays = _display.GetAllDisplays();
+        CurrentTopology = HingeCalculator.ComputeDuoTopology(displays, activationHalfWidth);
         _logger.LogInformation("Duo topology recomputed: {Topology}", CurrentTopology);
+        WriteHingeDebugLog(displays, activationHalfWidth);
         TopologyChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void Dispose() => Stop();
+
+    // Temporary diagnostic for the "hinge snap does nothing" investigation —
+    // dumps the raw display geometry Windows reports alongside the pairing
+    // result, since HingeCalculator requires byte-exact edge alignment and a
+    // real monitor arrangement is a much likelier source of a mismatch than
+    // anything reachable by reading the code. Remove once root-caused.
+    private static void WriteHingeDebugLog(IReadOnlyList<DisplayInfo> displays, int activationHalfWidth)
+    {
+        try
+        {
+            var lines = new List<string>
+            {
+                $"{DateTime.Now:O} activationHalfWidth={activationHalfWidth} displayCount={displays.Count}"
+            };
+            foreach (var d in displays)
+                lines.Add($"  {d}");
+
+            System.IO.File.AppendAllLines(
+                System.IO.Path.Combine(AppContext.BaseDirectory, "hinge-debug.log"), lines);
+        }
+        catch
+        {
+            // Diagnostics must not affect app behavior.
+        }
+    }
 }
